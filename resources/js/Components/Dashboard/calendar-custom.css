@@ -1,0 +1,30 @@
+/* Estilos personalizados para react-calendar */
+.custom-calendar {
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+  background: #fff;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  padding: 8px;
+}
+.custom-calendar .react-calendar__tile--active {
+  background: #1976D2 !important;
+  color: #fff !important;
+  border-radius: 0.75rem;
+}
+.custom-calendar .react-calendar__tile:enabled:hover,
+.custom-calendar .react-calendar__tile:enabled:focus {
+  background: #90caf9 !important;
+  color: #1a237e !important;
+  border-radius: 0.75rem;
+}
+.custom-calendar .react-calendar__tile {
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+.custom-calendar .react-calendar__navigation button {
+  color: #1976D2;
+  font-weight: bold;
+}
+.custom-calendar .react-calendar__month-view__days__day--weekend {
+  color: #e53935;
+} 

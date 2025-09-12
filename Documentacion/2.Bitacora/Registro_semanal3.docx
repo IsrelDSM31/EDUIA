@@ -1,0 +1,24 @@
+Registro Semanal - Semana 3
+
+Elemento           | Detalle
+------------------|-----------------------------
+Período            | 10/06/2025 - 16/06/2025
+Sprint             | Sprint 2
+Estado General     | 🟡 En Progreso
+
+Actividades por Miembro
+
+| Tarea                    | Descripción                                 | Estado        | Tiempo Dedicado | Observaciones                         |
+|--------------------------|---------------------------------------------|--------------|-----------------|---------------------------------------|
+| Integración Chatbot      | Backend y frontend con OpenAI, rate limit   | 🟢 Completado | 10h             | Chatbot funcional, manejo de errores   |
+| Refactorización Controlador | Corrección de errores PHP y reintentos   | 🟢 Completado | 4h              | Sintaxis y robustez mejoradas          |
+| Middleware Rate Limiting | Middleware personalizado para API           | 🟢 Completado | 3h              | Limita peticiones por usuario/IP       |
+| Pruebas de API           | Testeo de rutas y manejo de errores         | 🟡 En Progreso| 2h              | Pruebas manuales y automáticas         |
+
+Bitácora de Cambios
+
+| Folio   | Fecha       | Autor                        | Categoría      | Prioridad | Descripción                                      | Componentes Afectados         | Cambios Realizados                        | Impacto                        | Estado      | Siguiente Acción                        | Dependencias                  | Notas Adicionales                        |
+|---------|-------------|------------------------------|----------------|-----------|--------------------------------------------------|-------------------------------|-------------------------------------------|-------------------------------|-------------|------------------------------------------|-------------------------------|-------------------------------------------|
+| BIT-004 | 14/06/2025  | Kevin Omar Cruz Garcia       | Desarrollo     | Alta      | Integración de Chatbot con OpenAI y manejo de errores | ChatBotController, Frontend  | Implementación de API y UI, manejo 429/500 | Mejora de interacción y robustez | Completado  | Monitorear uso y feedback de usuarios    | OpenAI API, axios             | Chatbot funcional y probado               |
+| BIT-005 | 14/06/2025  | Jesús Castañeda Serrano      | Testing        | Media     | Pruebas de rate limiting y errores de API         | Middleware, API               | Pruebas manuales y unitarias              | Verificación de robustez        | En Progreso | Automatizar pruebas                     | PHPUnit, Postman               | Se detectaron y corrigieron errores 500   |
+| BIT-006 | 14/06/2025  | Nicolás Israel Sánchez Almeyda| Documentación | Alta      | Documentación de integración y pruebas de chatbot | Manual Usuario, API Docs      | Actualización de guías y bitácora         | Facilita onboarding y soporte   | En Review   | Revisión cruzada y publicación interna   | Documentación previa           | Aprobación pendiente del equipo           | 

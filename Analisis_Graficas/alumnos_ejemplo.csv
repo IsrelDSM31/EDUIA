@@ -1,0 +1,63 @@
+id,matricula,nombre,apellido,grupo,materia,calificacion,fecha,asistencia,estado
+1,20240001,Luis,Torres,1ºA,Matemáticas,68,2025-04-10,tardanza,graduado
+2,20240002,Luis,García,3ºA,Ciencias,80,2024-08-15,presente,inactivo
+3,20240003,Ana,Flores,1ºA,Educación Física,100,2025-04-04,tardanza,graduado
+4,20240004,Ana,Torres,3ºA,Ciencias,100,2025-05-02,presente,activo
+5,20240005,Luis,Flores,4ºA,Matemáticas,69,2024-12-19,tardanza,inactivo
+6,20240006,Diego,Sánchez,1ºA,Ciencias,71,2025-04-18,ausente,graduado
+7,20240007,Carmen,González,2ºB,Educación Física,77,2025-06-08,tardanza,inactivo
+8,20240008,Pedro,Torres,4ºB,Arte,91,2025-05-27,tardanza,activo
+9,20240009,Carmen,Rodríguez,4ºB,Literatura,73,2024-09-27,presente,graduado
+10,20240010,Ana,Pérez,2ºB,Arte,82,2024-10-01,presente,activo
+11,20240011,María,Sánchez,3ºB,Educación Física,66,2025-06-14,ausente,graduado
+12,20240012,Carlos,Flores,3ºB,Educación Física,81,2024-11-03,tardanza,activo
+13,20240013,Juan,Ramírez,3ºA,Literatura,84,2025-07-22,ausente,activo
+14,20240014,Juan,García,3ºA,Matemáticas,71,2024-08-18,presente,graduado
+15,20240015,Elena,López,3ºA,Matemáticas,62,2025-04-03,presente,activo
+16,20240016,Ana,Ramírez,2ºB,Arte,92,2024-10-30,tardanza,graduado
+17,20240017,María,Sánchez,2ºA,Inglés,87,2025-01-21,ausente,graduado
+18,20240018,Carlos,Ramírez,4ºA,Arte,79,2025-02-17,presente,graduado
+19,20240019,Ana,Flores,4ºA,Literatura,99,2025-01-07,ausente,inactivo
+20,20240020,Carlos,Ramírez,2ºA,Inglés,100,2025-06-20,presente,activo
+21,20240021,Juan,Flores,4ºA,Matemáticas,68,2024-07-28,ausente,activo
+22,20240022,Sofia,García,1ºB,Educación Física,90,2025-07-10,ausente,graduado
+23,20240023,Luis,García,2ºB,Matemáticas,76,2025-01-27,ausente,activo
+24,20240024,Diego,Flores,3ºB,Inglés,72,2024-11-02,tardanza,inactivo
+25,20240025,Luis,González,2ºA,Educación Física,68,2024-12-02,presente,graduado
+26,20240026,Sofia,Sánchez,4ºB,Educación Física,79,2025-06-06,tardanza,graduado
+27,20240027,Luis,Flores,2ºB,Arte,84,2024-08-22,tardanza,activo
+28,20240028,Sofia,Ramírez,2ºA,Inglés,94,2024-09-10,tardanza,graduado
+29,20240029,María,Ramírez,2ºA,Literatura,86,2024-08-27,presente,graduado
+30,20240030,Ana,Pérez,4ºA,Literatura,90,2024-12-23,ausente,inactivo
+31,20240031,Sofia,Torres,4ºB,Inglés,81,2025-05-23,tardanza,activo
+32,20240032,Diego,Ramírez,4ºA,Ciencias,98,2024-11-24,tardanza,graduado
+33,20240033,Pedro,Sánchez,2ºA,Inglés,67,2024-09-29,tardanza,inactivo
+34,20240034,Elena,Sánchez,1ºB,Ciencias,73,2025-05-23,tardanza,activo
+35,20240035,Luis,Pérez,3ºA,Arte,94,2025-04-10,presente,graduado
+36,20240036,Ana,Rodríguez,1ºA,Literatura,83,2024-10-11,tardanza,graduado
+37,20240037,Elena,Flores,3ºA,Educación Física,92,2024-09-30,ausente,inactivo
+38,20240038,Carlos,Rodríguez,2ºA,Literatura,76,2024-10-27,tardanza,graduado
+39,20240039,Sofia,Pérez,3ºA,Inglés,69,2025-02-24,ausente,graduado
+40,20240040,Carmen,Martínez,4ºA,Historia,60,2025-04-15,presente,activo
+41,20240041,Diego,Rodríguez,2ºA,Arte,77,2024-09-26,presente,activo
+42,20240042,Diego,Sánchez,3ºB,Arte,85,2025-05-31,presente,graduado
+43,20240043,Carmen,Martínez,1ºA,Matemáticas,65,2025-04-29,tardanza,activo
+44,20240044,Sofia,Flores,3ºB,Historia,93,2024-10-13,tardanza,activo
+45,20240045,Elena,Flores,2ºB,Literatura,76,2024-10-09,presente,graduado
+46,20240046,Luis,Ramírez,1ºA,Matemáticas,92,2025-05-29,ausente,activo
+47,20240047,Carlos,González,1ºA,Arte,62,2025-03-14,tardanza,inactivo
+48,20240048,Carmen,Sánchez,1ºB,Literatura,60,2025-03-03,presente,activo
+49,20240049,Luis,Torres,1ºB,Historia,90,2025-04-18,presente,graduado
+50,20240050,Diego,Rodríguez,2ºA,Matemáticas,89,2024-10-06,tardanza,graduado
+51,20240001,Juan,García,1ºA,Matemáticas,85,2024-01-15,presente,activo
+52,20240001,Juan,García,1ºA,Matemáticas,85,2024-01-15,presente,activo
+53,20240002,María,Rodríguez,2ºB,Historia,92,2024-02-20,presente,activo
+54,20240003,María,Rodríguez,2ºB,Ciencias,88,2024-02-20,tardanza,activo
+55,20240004,Carlos,López,3ºA,Literatura,78,2024-03-10,ausente,activo
+56,20240004,Carlos,López,3ºA,Literatura,78,2024-03-10,ausente,activo
+57,20240004,Carlos,López,3ºA,Literatura,78,2024-03-10,ausente,activo
+58,20240005,Ana,Martínez,4ºB,Inglés,95,2024-04-05,presente,activo
+59,20240005,Ana,Martínez,4ºB,Inglés,95,2024-04-05,presente,activo
+60,20240006,Luis,González,1ºB,Arte,82,2024-05-12,presente,activo
+61,20240006,Luis,González,1ºB,Arte,82,2024-05-12,presente,activo
+62,20240006,Luis,González,1ºB,Arte,82,2024-05-12,presente,activo

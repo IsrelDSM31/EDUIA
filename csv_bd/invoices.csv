@@ -1,0 +1,4 @@
+"id","user_id","number","amount","due_date","status","pdf_path","description","created_at","updated_at"
+"1","2","TEST-2-20250630044156","420.00","2025-07-30","pending",NULL,"Factura de prueba para notificaciones globales","2025-06-30 04:41:56","2025-06-30 04:41:56"
+"2","3","TEST-3-20250630044156","881.00","2025-07-30","pending",NULL,"Factura de prueba para notificaciones globales","2025-06-30 04:41:56","2025-06-30 04:41:56"
+"3","5","TEST-5-20250630044156","621.00","2025-07-30","pending",NULL,"Factura de prueba para notificaciones globales","2025-06-30 04:41:56","2025-06-30 04:41:56"

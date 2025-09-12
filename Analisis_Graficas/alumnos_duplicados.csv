@@ -1,0 +1,44 @@
+id,matricula,nombre,apellido,grupo,materia,calificacion,fecha,asistencia,estado
+1,20240001,Ana,Sánchez,2ºB,Historia,95,2025-05-31,tardanza,activo
+2,20240002,Elena,González,3ºA,Literatura,97,2025-06-01,presente,activo
+3,20240003,Pedro,Sánchez,3ºB,Literatura,95,2025-07-04,ausente,graduado
+4,20240004,Carlos,Ramírez,2ºB,Literatura,95,2024-10-21,ausente,inactivo
+5,20240005,María,Sánchez,4ºA,Educación Física,92,2025-04-09,presente,inactivo
+6,20240006,María,Sánchez,3ºB,Arte,84,2024-11-11,ausente,inactivo
+7,20240007,Sofia,Ramírez,3ºB,Ciencias,81,2024-10-06,tardanza,inactivo
+8,20240008,Sofia,Sánchez,4ºB,Educación Física,89,2025-05-16,presente,activo
+9,20240009,María,López,4ºB,Ciencias,70,2025-07-08,presente,activo
+10,20240010,Carlos,Sánchez,4ºB,Educación Física,85,2025-02-07,presente,inactivo
+11,20240011,Sofia,García,1ºA,Matemáticas,63,2025-05-06,ausente,graduado
+12,20240012,Elena,Pérez,1ºB,Matemáticas,82,2024-12-13,ausente,activo
+13,20240013,Elena,Sánchez,4ºB,Arte,80,2024-08-08,tardanza,activo
+14,20240014,Pedro,López,1ºA,Inglés,66,2025-05-15,tardanza,activo
+15,20240015,Sofia,González,2ºA,Inglés,89,2024-12-30,ausente,inactivo
+16,20240016,Ana,López,2ºA,Historia,97,2025-01-28,presente,inactivo
+17,20240017,Sofia,Sánchez,2ºB,Inglés,77,2025-02-20,tardanza,graduado
+18,20240018,Diego,González,4ºB,Inglés,64,2025-06-10,presente,activo
+19,20240019,Carlos,Sánchez,2ºA,Literatura,94,2025-06-15,tardanza,graduado
+20,20240020,Elena,Martínez,3ºA,Ciencias,100,2025-03-01,ausente,inactivo
+21,20240001,Juan,García,1ºA,Matemáticas,85,2024-01-15,presente,activo
+22,20240001,Juan,García,1ºA,Matemáticas,85,2024-01-15,presente,activo
+23,20240001,Juan,García,1ºA,Matemáticas,85,2024-01-15,presente,activo
+24,20240002,María,Rodríguez,2ºB,Historia,92,2024-02-20,presente,activo
+25,20240003,María,Rodríguez,2ºB,Ciencias,88,2024-02-20,tardanza,activo
+26,20240004,María,Rodríguez,2ºB,Literatura,90,2024-02-20,presente,activo
+27,20240005,Carlos,López,3ºA,Inglés,78,2024-03-10,ausente,activo
+28,20240005,Carlos,López,3ºA,Inglés,78,2024-03-10,ausente,activo
+29,20240005,Carlos,López,3ºA,Inglés,78,2024-03-10,ausente,activo
+30,20240005,Carlos,López,3ºA,Inglés,78,2024-03-10,ausente,activo
+31,20240006,Ana,Martínez,4ºB,Arte,95,2024-04-05,presente,activo
+32,20240006,Ana,Martínez,4ºB,Arte,95,2024-04-05,presente,activo
+33,20240007,Luis,González,1ºB,Educación Física,82,2024-05-12,presente,activo
+34,20240007,Luis,González,1ºB,Educación Física,82,2024-05-12,presente,activo
+35,20240007,Luis,González,1ºB,Educación Física,82,2024-05-12,presente,activo
+36,20240008,Sofia,Pérez,2ºA,Matemáticas,88,2024-06-01,presente,activo
+37,20240008,Sofia,Pérez,2ºA,Matemáticas,88,2024-06-01,presente,activo
+38,20240009,Diego,Sánchez,3ºB,Historia,75,2024-07-15,tardanza,activo
+39,20240010,Elena,Ramírez,3ºB,Historia,89,2024-07-15,presente,activo
+40,20240011,Pedro,Torres,3ºB,Historia,91,2024-07-15,presente,activo
+41,20240012,Carmen,Flores,4ºA,Ciencias,93,2024-08-20,presente,activo
+42,20240013,Juan,García,4ºA,Literatura,87,2024-08-20,presente,activo
+43,20240014,María,Rodríguez,4ºA,Inglés,94,2024-08-20,presente,activo

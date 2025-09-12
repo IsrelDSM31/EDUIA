@@ -1,0 +1,2 @@
+"id","user_id","plan_type","amount","status","start_date","end_date","payment_method","transaction_id","notes","created_at","updated_at"
+"1","14","anual","0.00","active","2025-07-05","2026-07-05","demo",NULL,"Suscripción de prueba creada por comando","2025-07-05 01:38:36","2025-07-05 01:38:36"

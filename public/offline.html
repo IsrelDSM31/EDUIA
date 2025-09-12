@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAEDU1 - Sin Conexión</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8B1538 0%, #A52A2A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .offline-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .offline-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .offline-message {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .offline-features {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .offline-features h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .offline-features ul {
+            list-style: none;
+        }
+
+        .offline-features li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .offline-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .retry-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .retry-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .connection-status {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .offline-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .offline-title {
+                font-size: 1.5rem;
+            }
+
+            .offline-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📱</div>
+        <h1 class="offline-title">Sin Conexión</h1>
+        <p class="offline-message">
+            No tienes conexión a internet en este momento, pero puedes seguir usando algunas funciones de IAEDU1.
+        </p>
+
+        <div class="offline-features">
+            <h3>Funciones disponibles offline:</h3>
+            <ul>
+                <li>Ver información de estudiantes guardada</li>
+                <li>Revisar calificaciones anteriores</li>
+                <li>Consultar horarios</li>
+                <li>Acceder a análisis de riesgo</li>
+                <li>Ver historial de cambios</li>
+            </ul>
+        </div>
+
+        <button class="retry-button" onclick="window.location.reload()">
+            🔄 Reintentar Conexión
+        </button>
+
+        <div class="connection-status">
+            Intentando reconectar automáticamente...
+        </div>
+    </div>
+
+    <script>
+        // Verificar conexión automáticamente
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }
+
+        // Escuchar cambios de conexión
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // Verificar cada 5 segundos
+        setInterval(checkConnection, 5000);
+
+        // Mostrar estado de conexión
+        const statusElement = document.querySelector('.connection-status');
+        
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                statusElement.textContent = '✅ Conexión restaurada - Recargando...';
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                statusElement.textContent = '❌ Sin conexión - Intentando reconectar...';
+            }
+        }
+
+        updateConnectionStatus();
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+    </script>
+</body>
+</html> 

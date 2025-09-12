@@ -1,0 +1,16 @@
+{
+    "python.defaultInterpreterPath": "C:\\xampp\\htdocs\\IAEDU1\\Analisis_Graficas\\venv\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "C:\\xampp\\htdocs\\IAEDU1\\Analisis_Graficas\\venv\\Lib\\site-packages"
+    ],
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticMode": "off",
+    "python.analysis.reportMissingImports": "none",
+    "python.analysis.reportUnusedImport": "none",
+    "python.analysis.reportUnusedClass": "none",
+    "python.analysis.reportUnusedFunction": "none",
+    "python.analysis.reportUnusedVariable": "none",
+    "python.linting.enabled": false,
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true
+}

@@ -1,0 +1,24 @@
+Registro Semanal - Semana 5
+
+Elemento           | Detalle
+------------------|-----------------------------
+Período            | 17/06/2025 - 23/06/2025
+Sprint             | Sprint 2
+Estado General     | 🟢 Finalizado
+
+Actividades por Miembro
+
+| Tarea                        | Descripción                                         | Estado        | Tiempo Dedicado | Observaciones                                 |
+|------------------------------|-----------------------------------------------------|--------------|-----------------|-----------------------------------------------|
+| Optimización de API          | Mejoras de rendimiento y reducción de latencia      | 🟢 Completado | 6h              | Respuestas más rápidas, menor uso de recursos  |
+| Documentación de endpoints   | Actualización y ampliación de documentación API     | 🟢 Completado | 3h              | Documentación lista para onboarding            |
+| Pruebas automatizadas        | Implementación de tests unitarios y de integración  | 🟢 Completado | 5h              | Cobertura de pruebas aumentada al 85%         |
+| Revisión de seguridad        | Auditoría de permisos y validaciones                | 🟢 Completado | 2h              | Se corrigieron vulnerabilidades menores        |
+
+Bitácora de Cambios
+
+| Folio   | Fecha       | Autor                        | Categoría      | Prioridad | Descripción                                      | Componentes Afectados         | Cambios Realizados                        | Impacto                        | Estado      | Siguiente Acción                        | Dependencias                  | Notas Adicionales                        |
+|---------|-------------|------------------------------|----------------|-----------|--------------------------------------------------|-------------------------------|-------------------------------------------|-------------------------------|-------------|------------------------------------------|-------------------------------|-------------------------------------------|
+| BIT-007 | 21/06/2025  | Kevin Omar Cruz Garcia       | Optimización   | Alta      | Refactorización de consultas y caché en API      | API, Backend                  | Reducción de tiempos de respuesta          | Mejor experiencia de usuario   | Completado  | Monitorear métricas de uso               | Redis, Laravel Cache           | Se redujo la latencia promedio a 120ms    |
+| BIT-008 | 22/06/2025  | Jesús Castañeda Serrano      | Testing        | Alta      | Implementación de pruebas automatizadas           | API, Tests                    | Nuevos tests unitarios y de integración    | Mayor robustez y confiabilidad | Completado  | Mantener cobertura de pruebas            | PHPUnit, Mockery               | Cobertura del 85% alcanzada              |
+| BIT-009 | 23/06/2025  | Nicolás Israel Sánchez Almeyda| Documentación | Media     | Actualización de documentación de endpoints      | Manual Usuario, API Docs      | Nuevas guías y ejemplos de uso            | Facilita onboarding y soporte  | Completado  | Difusión entre el equipo                 | Documentación previa           | Documentación publicada en wiki interna   |

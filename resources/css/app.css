@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* Tus estilos originales aquí */
+    .btn-primary {
+        background-color: #1561F0 !important;
+        color: #fff !important;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        transition: background 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) {
+        background-color: #104bb3 !important;
+    }
+    .btn-secondary {
+        background-color: #2B2B2B !important;
+        color: #86868B !important;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    .card-dark {
+        background: #2B2B2B !important;
+        color: #fff !important;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        padding: 2rem;
+    }
+    .text-secondary {
+        color: #86868B !important;
+    }
+}
+
+body {
+  background: linear-gradient(180deg, #FFD6A5 0%, #FF61A6 100%) !important;
+  color: #fff !important;
+  font-family: 'Inter', 'Helvetica Neue', Arial, 'sans-serif';
+}
