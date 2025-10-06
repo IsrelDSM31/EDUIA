@@ -78,26 +78,45 @@ class AlertApiController extends ApiController
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Alert::query();
+        $query = Alert::with('student')->latest();
 
         if ($request->has('student_id')) {
             $query->where('student_id', $request->student_id);
         }
 
-        if ($request->has('tipo')) {
-            $query->where('tipo', $request->tipo);
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
         }
 
-        if ($request->has('estado')) {
-            $query->where('estado', $request->estado);
+        if ($request->has('urgency')) {
+            $query->where('urgency', $request->urgency);
         }
 
-        if ($request->has('with')) {
-            $relations = explode(',', $request->with);
-            $query->with($relations);
-        }
+        $alerts = $query->paginate($request->get('per_page', 50));
 
-        $alerts = $query->paginate($request->get('per_page', 15));
+        // Transformar datos para la app móvil
+        $transformedData = $alerts->getCollection()->map(function ($alert) {
+            $student = $alert->student;
+            $studentName = $student 
+                ? trim($student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno)
+                : 'Estudiante';
+            
+            return [
+                'id' => $alert->id,
+                'student_id' => $alert->student_id,
+                'student_name' => $studentName,
+                'type' => $alert->type,
+                'title' => $alert->title,
+                'message' => $alert->description,
+                'urgency' => $alert->urgency,
+                'severity' => $alert->urgency, // Para compatibilidad
+                'date' => $alert->created_at->toDateString(),
+                'created_at' => $alert->created_at->format('Y-m-d H:i:s'),
+                'is_read' => $alert->urgency === 'low',
+            ];
+        });
+
+        $alerts->setCollection($transformedData);
 
         return $this->successResponse($alerts, 'Alerts retrieved successfully');
     }
@@ -189,13 +208,22 @@ class AlertApiController extends ApiController
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'tipo' => 'required|string|max:255',
-            'mensaje' => 'required|string',
-            'estado' => 'nullable|in:activa,resuelta',
-            'fecha' => 'nullable|date',
+            'type' => 'required|string|max:255',
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'urgency' => 'nullable|in:low,medium,high',
         ]);
 
-        $alert = Alert::create($validated);
+        $alert = Alert::create([
+            'student_id' => $validated['student_id'],
+            'type' => $validated['type'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'urgency' => $validated['urgency'] ?? 'medium',
+            'evidence' => [],
+            'suggested_actions' => [],
+            'intervention_plan' => [],
+        ]);
 
         return $this->successResponse($alert, 'Alert created successfully', 201);
     }
@@ -251,10 +279,10 @@ class AlertApiController extends ApiController
 
         $validated = $request->validate([
             'student_id' => 'sometimes|exists:students,id',
-            'tipo' => 'sometimes|string|max:255',
-            'mensaje' => 'sometimes|string',
-            'estado' => 'nullable|in:activa,resuelta',
-            'fecha' => 'nullable|date',
+            'type' => 'sometimes|string|max:255',
+            'title' => 'sometimes|string',
+            'description' => 'sometimes|string',
+            'urgency' => 'nullable|in:low,medium,high',
         ]);
 
         $alert->update($validated);
@@ -342,11 +370,32 @@ class AlertApiController extends ApiController
 
         $statistics = [
             'total_alerts' => $alerts->count(),
-            'active_alerts' => $alerts->where('estado', 'activa')->count(),
-            'resolved_alerts' => $alerts->where('estado', 'resuelta')->count(),
-            'alerts_by_type' => $alerts->groupBy('tipo')->map->count(),
+            'high_urgency' => $alerts->where('urgency', 'high')->count(),
+            'medium_urgency' => $alerts->where('urgency', 'medium')->count(),
+            'low_urgency' => $alerts->where('urgency', 'low')->count(),
+            'alerts_by_type' => $alerts->groupBy('type')->map->count(),
         ];
 
         return $this->successResponse($statistics, 'Alert statistics retrieved successfully');
+    }
+
+    public function unread(): JsonResponse
+    {
+        $alerts = Alert::where('urgency', 'high')->latest()->get();
+        return $this->successResponse($alerts, 'Unread alerts retrieved successfully');
+    }
+
+    public function markAsRead($id): JsonResponse
+    {
+        $alert = Alert::find($id);
+
+        if (!$alert) {
+            return $this->notFoundResponse('Alert not found');
+        }
+
+        // Cambiar urgencia a baja como "leída"
+        $alert->update(['urgency' => 'low']);
+
+        return $this->successResponse($alert, 'Alert marked as read successfully');
     }
 } 

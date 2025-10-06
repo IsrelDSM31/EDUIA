@@ -96,9 +96,27 @@ class StudentApiController extends ApiController
             $query->with($relations);
         }
 
-        $students = $query->paginate($request->get('per_page', 15));
+        $students = $query->with(['user', 'group'])->get();
 
-        return $this->successResponse($students, 'Students retrieved successfully');
+        // Transformar datos para la app móvil
+        $transformedStudents = $students->map(function($student) {
+            // Obtener el nivel de riesgo más reciente si existe
+            $latestRisk = $student->studentRisks()->latest()->first();
+            
+            return [
+                'id' => $student->id,
+                'name' => trim($student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno),
+                'email' => $student->user->email ?? $student->matricula . '@eduia.com',
+                'student_code' => $student->matricula,
+                'phone' => $student->emergency_contact['phone'] ?? '',
+                'birth_date' => $student->birth_date,
+                'grade' => $student->group->name ?? 'Sin grupo',
+                'address' => $student->parent_data['address'] ?? '',
+                'risk_level' => $latestRisk->risk_level ?? 'low',
+            ];
+        });
+
+        return $this->successResponse($transformedStudents, 'Students retrieved successfully');
     }
 
     /**
@@ -137,20 +155,29 @@ class StudentApiController extends ApiController
      */
     public function show(Request $request, $id): JsonResponse
     {
-        $query = Student::query();
-
-        if ($request->has('with')) {
-            $relations = explode(',', $request->with);
-            $query->with($relations);
-        }
-
-        $student = $query->find($id);
+        $student = Student::with(['user', 'group'])->find($id);
 
         if (!$student) {
             return $this->notFoundResponse('Student not found');
         }
 
-        return $this->successResponse($student, 'Student retrieved successfully');
+        // Obtener el nivel de riesgo más reciente si existe
+        $latestRisk = $student->studentRisks()->latest()->first();
+
+        // Transformar datos para la app móvil
+        $transformedStudent = [
+            'id' => $student->id,
+            'name' => trim($student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno),
+            'email' => $student->user->email ?? $student->matricula . '@eduia.com',
+            'student_code' => $student->matricula,
+            'phone' => $student->emergency_contact['phone'] ?? '',
+            'birth_date' => $student->birth_date,
+            'grade' => $student->group->name ?? 'Sin grupo',
+            'address' => $student->parent_data['address'] ?? '',
+            'risk_level' => $latestRisk->risk_level ?? 'low',
+        ];
+
+        return $this->successResponse($transformedStudent, 'Student retrieved successfully');
     }
 
     /**
@@ -193,24 +220,83 @@ class StudentApiController extends ApiController
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'matricula' => 'required|string|unique:students,matricula',
-            'nombre' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'group_id' => 'required|exists:groups,id',
-            'birth_date' => 'nullable|date',
-            'curp' => 'nullable|string|max:18',
-            'blood_type' => 'nullable|string|max:5',
-            'allergies' => 'nullable|string',
-            'emergency_contact' => 'nullable|array',
-            'parent_data' => 'nullable|array',
-            'user_id' => 'nullable|exists:users,id',
+        // Validar datos de la app móvil
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'student_code' => 'required|string|unique:students,matricula',
         ]);
 
-        $student = Student::create($validated);
+        // Dividir el nombre en partes
+        $nameParts = explode(' ', trim($request->name));
+        $nombre = $nameParts[0] ?? '';
+        $apellido_paterno = $nameParts[1] ?? '';
+        $apellido_materno = isset($nameParts[2]) ? implode(' ', array_slice($nameParts, 2)) : '';
 
-        return $this->successResponse($student, 'Student created successfully', 201);
+        // Buscar o crear usuario asociado
+        $user = \App\Models\User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'role' => 'student'
+            ]);
+        }
+
+        // Obtener grupo por defecto
+        $defaultGroup = \App\Models\Group::first();
+
+        $studentData = [
+            'user_id' => $user->id,
+            'matricula' => $request->student_code,
+            'nombre' => $nombre,
+            'apellido_paterno' => $apellido_paterno,
+            'apellido_materno' => $apellido_materno,
+            'group_id' => $defaultGroup->id ?? 1,
+            'birth_date' => $request->birth_date,
+            'emergency_contact' => ['phone' => $request->phone ?? ''],
+            'parent_data' => ['address' => $request->address ?? ''],
+        ];
+
+        $student = Student::create($studentData);
+
+        // Crear registro de riesgo inicial para el estudiante
+        \App\Models\StudentRisk::create([
+            'student_id' => $student->id,
+            'risk_level' => 'bajo',
+            'risk_score' => 0,
+            'performance_metrics' => [
+                'attendance_rate' => 100,
+                'grade_average' => 0,
+                'failed_subjects' => 0,
+                'recent_improvement' => 0
+            ],
+            'intervention_recommendations' => [
+                [
+                    'type' => 'monitoring',
+                    'priority' => 'low',
+                    'message' => 'Estudiante nuevo. Establecer línea base de rendimiento y asistencia.'
+                ]
+            ],
+            'notes' => 'Estudiante recién inscrito',
+        ]);
+
+        // Transformar respuesta
+        $transformedStudent = [
+            'id' => $student->id,
+            'name' => trim($student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno),
+            'email' => $request->email,
+            'student_code' => $student->matricula,
+            'phone' => $request->phone ?? '',
+            'birth_date' => $student->birth_date,
+            'grade' => $student->group->name ?? 'Sin grupo',
+            'address' => $request->address ?? '',
+            'risk_level' => 'bajo',
+        ];
+
+        return $this->successResponse($transformedStudent, 'Student created successfully', 201);
     }
 
     /**
@@ -269,24 +355,67 @@ class StudentApiController extends ApiController
             return $this->notFoundResponse('Student not found');
         }
 
-        $validated = $request->validate([
-            'matricula' => 'sometimes|string|unique:students,matricula,' . $id,
-            'nombre' => 'sometimes|string|max:255',
-            'apellido_paterno' => 'sometimes|string|max:255',
-            'apellido_materno' => 'sometimes|string|max:255',
-            'group_id' => 'sometimes|exists:groups,id',
-            'birth_date' => 'nullable|date',
-            'curp' => 'nullable|string|max:18',
-            'blood_type' => 'nullable|string|max:5',
-            'allergies' => 'nullable|string',
-            'emergency_contact' => 'nullable|array',
-            'parent_data' => 'nullable|array',
-            'user_id' => 'nullable|exists:users,id',
+        // Validar datos de la app móvil
+        $request->validate([
+            'name' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'student_code' => 'sometimes|string|unique:students,matricula,' . $id,
         ]);
 
-        $student->update($validated);
+        $updateData = [];
 
-        return $this->successResponse($student, 'Student updated successfully');
+        // Actualizar nombre si viene en la petición
+        if ($request->has('name')) {
+            $nameParts = explode(' ', trim($request->name));
+            $updateData['nombre'] = $nameParts[0] ?? '';
+            $updateData['apellido_paterno'] = $nameParts[1] ?? '';
+            $updateData['apellido_materno'] = isset($nameParts[2]) ? implode(' ', array_slice($nameParts, 2)) : '';
+        }
+
+        // Actualizar matrícula
+        if ($request->has('student_code')) {
+            $updateData['matricula'] = $request->student_code;
+        }
+
+        // Actualizar fecha de nacimiento
+        if ($request->has('birth_date')) {
+            $updateData['birth_date'] = $request->birth_date;
+        }
+
+        // Actualizar teléfono y dirección
+        if ($request->has('phone') || $request->has('address')) {
+            $emergencyContact = $student->emergency_contact ?? [];
+            $parentData = $student->parent_data ?? [];
+            
+            if ($request->has('phone')) {
+                $emergencyContact['phone'] = $request->phone;
+                $updateData['emergency_contact'] = $emergencyContact;
+            }
+            
+            if ($request->has('address')) {
+                $parentData['address'] = $request->address;
+                $updateData['parent_data'] = $parentData;
+            }
+        }
+
+        $student->update($updateData);
+
+        // Transformar respuesta
+        $latestRisk = $student->studentRisks()->latest()->first();
+        
+        $transformedStudent = [
+            'id' => $student->id,
+            'name' => trim($student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno),
+            'email' => $request->email ?? $student->user->email ?? $student->matricula . '@eduia.com',
+            'student_code' => $student->matricula,
+            'phone' => $student->emergency_contact['phone'] ?? '',
+            'birth_date' => $student->birth_date,
+            'grade' => $student->group->name ?? 'Sin grupo',
+            'address' => $student->parent_data['address'] ?? '',
+            'risk_level' => $latestRisk->risk_level ?? 'low',
+        ];
+
+        return $this->successResponse($transformedStudent, 'Student updated successfully');
     }
 
     /**
@@ -407,5 +536,42 @@ class StudentApiController extends ApiController
         $attendance = $student->attendances()->get();
 
         return $this->successResponse($attendance, 'Student attendance retrieved successfully');
+    }
+
+    public function alerts($id): JsonResponse
+    {
+        $student = Student::find($id);
+
+        if (!$student) {
+            return $this->notFoundResponse('Student not found');
+        }
+
+        $alerts = $student->alerts()->get();
+
+        return $this->successResponse($alerts, 'Student alerts retrieved successfully');
+    }
+
+    public function riskAnalysis($id): JsonResponse
+    {
+        $student = Student::find($id);
+
+        if (!$student) {
+            return $this->notFoundResponse('Student not found');
+        }
+
+        $latestRisk = $student->studentRisks()->latest()->first();
+
+        $data = [
+            'student_id' => $student->id,
+            'student_name' => $student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno,
+            'student_code' => $student->matricula,
+            'risk_level' => $latestRisk->risk_level ?? 'none',
+            'risk_score' => $latestRisk->risk_score ?? 0,
+            'risk_factors' => $latestRisk->risk_factors ? json_decode($latestRisk->risk_factors) : [],
+            'recommendations' => $latestRisk->recommendations ?? 'Sin recomendaciones',
+            'last_analysis' => $latestRisk->updated_at ?? now(),
+        ];
+
+        return $this->successResponse($data, 'Student risk analysis retrieved successfully');
     }
 } 

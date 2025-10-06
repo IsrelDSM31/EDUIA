@@ -86,6 +86,11 @@ class Student extends Model
         return $this->hasMany(StudentRisk::class);
     }
 
+    public function risk()
+    {
+        return $this->hasOne(StudentRisk::class)->latestOfMany();
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->nombre . ' ' . $this->apellido_paterno . ' ' . ($this->apellido_materno ?? ''));

@@ -80,7 +80,7 @@ class GradeApiController extends ApiController
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Grade::query();
+        $query = Grade::with(['student', 'subject']);
 
         // Filtros
         if ($request->has('student_id')) {
@@ -97,13 +97,25 @@ class GradeApiController extends ApiController
             });
         }
 
-        // Incluir relaciones
-        if ($request->has('with')) {
-            $relations = explode(',', $request->with);
-            $query->with($relations);
-        }
+        $grades = $query->latest()->paginate($request->get('per_page', 50));
 
-        $grades = $query->paginate($request->get('per_page', 15));
+        // Transformar los datos para la app móvil
+        $transformedData = $grades->getCollection()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'student_name' => $item->student 
+                    ? trim($item->student->nombre . ' ' . $item->student->apellido_paterno . ' ' . $item->student->apellido_materno)
+                    : 'Estudiante',
+                'student_code' => $item->student->matricula ?? 'N/A',
+                'course_name' => $item->subject->nombre ?? 'Materia',
+                'subject_name' => $item->subject->nombre ?? 'Materia',
+                'grade' => $item->promedio_final,
+                'assignment' => $item->estado ?? 'Evaluación',
+                'date' => $item->date ?? $item->created_at->format('Y-m-d'),
+            ];
+        });
+
+        $grades->setCollection($transformedData);
 
         return $this->successResponse($grades, 'Grades retrieved successfully');
     }

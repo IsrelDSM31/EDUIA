@@ -2578,23 +2578,38 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "fecha": {
+                    "subject_id": {
+                        "description": "ID de la materia",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "date": {
                         "description": "Fecha de la asistencia",
                         "type": "string",
                         "format": "date",
                         "example": "2024-01-15"
                     },
-                    "estado": {
+                    "status": {
                         "description": "Estado de la asistencia",
                         "type": "string",
                         "enum": [
-                            "presente",
-                            "ausente",
-                            "tardanza"
+                            "present",
+                            "absent",
+                            "late"
                         ],
-                        "example": "presente"
+                        "example": "present"
                     },
-                    "observaciones": {
+                    "justification_type": {
+                        "description": "Tipo de justificación",
+                        "type": "string",
+                        "example": "medical"
+                    },
+                    "justification_document": {
+                        "description": "Documento de justificación",
+                        "type": "string",
+                        "example": "document.pdf"
+                    },
+                    "observations": {
                         "description": "Observaciones adicionales",
                         "type": "string",
                         "example": "Llegó a tiempo"

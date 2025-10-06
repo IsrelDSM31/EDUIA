@@ -27,14 +27,19 @@ class Alert extends Model
 
     protected $fillable = [
         'student_id',
-        'tipo',
-        'mensaje',
-        'estado',
-        'fecha',
+        'type',
+        'title',
+        'description',
+        'urgency',
+        'evidence',
+        'suggested_actions',
+        'intervention_plan',
     ];
 
     protected $casts = [
-        'fecha' => 'date',
+        'evidence' => 'array',
+        'suggested_actions' => 'array',
+        'intervention_plan' => 'array',
     ];
 
     public function student(): BelongsTo

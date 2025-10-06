@@ -78,26 +78,52 @@ class AttendanceApiController extends ApiController
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Attendance::query();
+        $query = Attendance::with(['student', 'student.group', 'subject']);
 
+        // Filtros
         if ($request->has('student_id')) {
             $query->where('student_id', $request->student_id);
         }
 
+        if ($request->has('subject_id')) {
+            $query->where('subject_id', $request->subject_id);
+        }
+
         if ($request->has('date')) {
-            $query->whereDate('fecha', $request->date);
+            $query->whereDate('date', $request->date);
         }
 
         if ($request->has('status')) {
-            $query->where('estado', $request->status);
+            $query->where('status', $request->status);
         }
 
-        if ($request->has('with')) {
-            $relations = explode(',', $request->with);
-            $query->with($relations);
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('date', [$request->start_date, $request->end_date]);
         }
 
-        $attendance = $query->paginate($request->get('per_page', 15));
+        $attendance = $query->latest('date')->paginate($request->get('per_page', 50));
+
+        // Transformar los datos para la app móvil
+        $transformedData = $attendance->getCollection()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'student_id' => $item->student_id,
+                'student_name' => $item->student 
+                    ? trim($item->student->nombre . ' ' . $item->student->apellido_paterno . ' ' . $item->student->apellido_materno)
+                    : 'Estudiante',
+                'student_code' => $item->student->matricula ?? 'N/A',
+                'subject_id' => $item->subject_id,
+                'subject_name' => $item->subject->name ?? 'Sin materia',
+                'status' => $item->status,
+                'date' => $item->date,
+                'time' => $item->created_at->format('H:i'),
+                'justification_type' => $item->justification_type,
+                'justification_document' => $item->justification_document,
+                'observations' => $item->observations,
+            ];
+        });
+
+        $attendance->setCollection($transformedData);
 
         return $this->successResponse($attendance, 'Attendance records retrieved successfully');
     }
@@ -188,14 +214,101 @@ class AttendanceApiController extends ApiController
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'fecha' => 'required|date',
-            'estado' => 'required|in:presente,ausente,tardanza',
+            'subject_id' => 'required|exists:subjects,id',
+            'fecha' => 'nullable|date',
+            'date' => 'nullable|date',
+            'estado' => 'nullable|in:presente,ausente,tardanza,justificado',
+            'status' => 'nullable|in:presente,ausente,tardanza,justificado,present,absent,late,justified',
             'observaciones' => 'nullable|string',
+            'observations' => 'nullable|string',
         ]);
 
-        $attendance = Attendance::create($validated);
+        // Normalizar datos (aceptar español e inglés)
+        $data = [
+            'student_id' => $validated['student_id'],
+            'subject_id' => $validated['subject_id'],
+            'date' => $validated['date'] ?? $validated['fecha'] ?? now()->toDateString(),
+            'status' => $validated['status'] ?? $validated['estado'] ?? 'presente',
+            'observations' => $validated['observations'] ?? $validated['observaciones'] ?? null,
+        ];
+
+        $attendance = Attendance::create($data);
 
         return $this->successResponse($attendance, 'Attendance record created successfully', 201);
+    }
+
+    /**
+     * Registrar asistencia para múltiples estudiantes
+     */
+    public function bulkStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'fecha' => 'nullable|date',
+            'date' => 'nullable|date',
+            'attendances' => 'required|array',
+            'attendances.*.student_id' => 'required|exists:students,id',
+            'attendances.*.estado' => 'nullable|in:presente,ausente,tardanza,justificado',
+            'attendances.*.status' => 'nullable|in:presente,ausente,tardanza,justificado,present,absent,late,justified',
+            'attendances.*.observaciones' => 'nullable|string',
+            'attendances.*.observations' => 'nullable|string',
+        ]);
+
+        $date = $validated['date'] ?? $validated['fecha'] ?? now()->toDateString();
+
+        $created = [];
+        foreach ($validated['attendances'] as $attendanceData) {
+            $created[] = Attendance::create([
+                'student_id' => $attendanceData['student_id'],
+                'subject_id' => $validated['subject_id'],
+                'date' => $date,
+                'status' => $attendanceData['status'] ?? $attendanceData['estado'] ?? 'presente',
+                'observations' => $attendanceData['observations'] ?? $attendanceData['observaciones'] ?? null,
+            ]);
+        }
+
+        return $this->successResponse($created, 'Attendance records created successfully', 201);
+    }
+
+    /**
+     * Justificar una asistencia
+     */
+    public function justify(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'justification_type' => 'required|string',
+            'observaciones' => 'nullable|string',
+            'observations' => 'nullable|string',
+        ]);
+
+        // Buscar última inasistencia sin justificar
+        $attendance = Attendance::where('student_id', $validated['student_id'])
+            ->where('subject_id', $validated['subject_id'])
+            ->whereIn('status', ['ausente', 'absent'])
+            ->whereNull('justification_type')
+            ->orderBy('date', 'desc')
+            ->first();
+
+        if (!$attendance) {
+            return $this->errorResponse('No hay inasistencias para justificar', 404);
+        }
+
+        // Agregar justificación
+        $attendance->justification_type = $validated['justification_type'];
+        $attendance->observations = $validated['observations'] ?? $validated['observaciones'] ?? $attendance->observations;
+        $attendance->status = 'justified';
+
+        // Guardar archivo si existe
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('justifications', 'public');
+            $attendance->justification_document = $path;
+        }
+
+        $attendance->save();
+
+        return $this->successResponse($attendance, 'Attendance justified successfully');
     }
 
     /**
