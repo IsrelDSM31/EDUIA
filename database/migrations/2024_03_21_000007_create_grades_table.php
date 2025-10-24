@@ -16,7 +16,7 @@ class CreateGradesTable extends Migration
             $table->string('evaluation_type')->nullable();
             $table->decimal('score', 4, 2)->nullable();
             $table->text('feedback')->nullable();
-            $table->date('date')->default(DB::raw('CURRENT_DATE'));
+            $table->date('date')->default(now());
             $table->timestamps();
         });
     }

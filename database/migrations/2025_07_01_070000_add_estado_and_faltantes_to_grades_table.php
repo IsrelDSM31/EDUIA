@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('grades', function (Blueprint $table) {
-            $table->string('estado')->nullable()->after('evaluation_date');
+            // $table->string('estado')->nullable()->after('evaluation_date');
             $table->decimal('faltantes', 5, 2)->nullable()->after('estado');
         });
     }
