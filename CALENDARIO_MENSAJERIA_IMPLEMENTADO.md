@@ -297,3 +297,7 @@ Si algo no funciona:
 **La app móvil ahora está completamente conectada al backend de Laravel**
 
 
+
+
+
+

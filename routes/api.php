@@ -20,6 +20,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\MessagingController;
 
 // Auth API
+Route::post('/auth/register', [App\Http\Controllers\Api\AuthApiController::class, 'register']);
 Route::post('/auth/login', [App\Http\Controllers\Api\AuthApiController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [App\Http\Controllers\Api\AuthApiController::class, 'logout']);

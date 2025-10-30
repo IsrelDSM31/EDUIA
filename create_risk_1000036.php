@@ -41,3 +41,7 @@ echo "Nivel: {$risk->risk_level}\n";
 
 
 
+
+
+
+
