@@ -120,7 +120,7 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                 setMessage(response.data.message || 'Error al registrar.');
             }
         } catch (err) {
-            // Error al registrar
+            console.error('Error al registrar:', err);
             const errorMessage = err.response?.data?.message || 'Error al registrar.';
             setMessage(errorMessage);
         }
@@ -464,7 +464,7 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                 throw new Error(response.data.message || 'Error al guardar las calificaciones');
             }
         } catch (error) {
-            // Error al guardar en el modal
+            console.error('Error al guardar en el modal:', error);
             const errorMessage = error.response?.data?.message || 
                                (error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') : null) ||
                                error.message ||
@@ -781,7 +781,7 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                 }
             }
         } catch (error) {
-            // Error al guardar calificaciones
+            console.error('Error al guardar calificaciones:', error);
             const errorMessage = error.response?.data?.message || 
                                error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') :
                                'Error al guardar las calificaciones. Por favor intenta de nuevo.';

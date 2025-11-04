@@ -40,7 +40,7 @@ export default function MainStats({ stats }) {
                 const attDate = (typeof att.date === 'string') ? att.date.split('T')[0] : new Date(att.date).toISOString().split('T')[0];
                 return attDate === todayStr;
             }).length;
-            // Alumno asistencias hoy
+            console.log(`Alumno ${student.nombre} (${student.id}) asistencias hoy:`, attendedToday);
             // Si tiene al menos una asistencia presente hoy, cuenta como global
             if (attendedToday > 0) {
                 count++;

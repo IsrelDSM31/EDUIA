@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 export default function ChatBot() {
@@ -12,19 +12,6 @@ export default function ChatBot() {
   const dragData = useRef({ dragging: false, offsetX: 0, offsetY: 0, moved: false });
   const lastRequestTime = useRef(0);
   const requestTimeout = useRef(null);
-  const countdownInterval = useRef(null);
-
-  // Limpiar intervalos al desmontar el componente
-  useEffect(() => {
-    return () => {
-      if (countdownInterval.current) {
-        clearInterval(countdownInterval.current);
-      }
-      if (requestTimeout.current) {
-        clearTimeout(requestTimeout.current);
-      }
-    };
-  }, []);
 
   // Rate limiting: máximo 1 petición cada 5 segundos (más conservador para evitar 429)
   const RATE_LIMIT_DELAY = 5000;
@@ -104,11 +91,7 @@ export default function ChatBot() {
             
             // Mostrar contador de tiempo restante
             let remainingSeconds = 30;
-            // Limpiar intervalo anterior si existe
-            if (countdownInterval.current) {
-              clearInterval(countdownInterval.current);
-            }
-            countdownInterval.current = setInterval(() => {
+            const countdown = setInterval(() => {
               remainingSeconds--;
               if (remainingSeconds > 0) {
                 setMessages(msgs => {
@@ -124,10 +107,7 @@ export default function ChatBot() {
                   return msgs;
                 });
               } else {
-                if (countdownInterval.current) {
-                  clearInterval(countdownInterval.current);
-                  countdownInterval.current = null;
-                }
+                clearInterval(countdown);
               }
             }, 1000);
             

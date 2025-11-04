@@ -16,7 +16,7 @@ export default function StudentShow({ auth, student }) {
                 const response = await axios.get(`/api/students/${student.id}/risk-analysis`);
                 setRiskData(response.data);
             } catch (error) {
-                // Error fetching risk data
+                console.error('Error fetching risk data:', error);
             } finally {
                 setLoading(false);
             }

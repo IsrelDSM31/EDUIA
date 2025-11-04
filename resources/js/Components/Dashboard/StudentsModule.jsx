@@ -35,7 +35,8 @@ export default function StudentsModule({ students: studentsProp, groups: groupsP
     const groups = groupsProp || stats?.groups || [];
     
     // Debug: mostrar en consola para verificar
-    // StudentsModule - students recibidos
+    console.log('StudentsModule - students recibidos:', students.length, students);
+    console.log('StudentsModule - studentsProp:', studentsProp);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

@@ -187,6 +187,7 @@ export default function AttendanceModule({ stats }) {
         e.preventDefault();
         setMessage('');
         try {
+            console.log('Sending attendance request with CSRF token:', csrf_token);
             const response = await fetch('/attendance', {
                 method: 'POST',
                 headers: {
@@ -201,6 +202,8 @@ export default function AttendanceModule({ stats }) {
                     status: attendanceStatus,
                 }),
             });
+            
+            console.log('Response status:', response.status);
             
             if (response.status === 419) {
                 setMessage('Error: Token CSRF expirado. Por favor, recarga la página e intenta de nuevo.');
@@ -217,6 +220,7 @@ export default function AttendanceModule({ stats }) {
                 setMessage(`Error al registrar asistencia: ${errorData.error || response.statusText}`);
             }
         } catch (err) {
+            console.error('Error in submitRegister:', err);
             setMessage('Error al registrar asistencia: ' + err.message);
         }
     };
