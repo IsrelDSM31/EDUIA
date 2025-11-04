@@ -53,8 +53,8 @@ class DashboardController extends Controller
                 'justification_type' => $attendance->justification_type ?? null,
                 'justification_document' => $attendance->justification_document ?? null,
                 'observations' => $attendance->observations ?? null,
-                'student_name' => $attendance->student->nombre . ' ' . $attendance->student->apellido_paterno,
-                'subject_name' => $attendance->subject->name,
+                'student_name' => $attendance->student ? ($attendance->student->nombre . ' ' . ($attendance->student->apellido_paterno ?? '')) : 'Estudiante eliminado',
+                'subject_name' => $attendance->subject ? $attendance->subject->name : 'Materia eliminada',
             ];
         });
         $stats['grades'] = Grade::with(['student', 'subject'])->get()->map(function($grade) {

@@ -48,7 +48,7 @@ export default function Authenticated({ header, children }) {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFD6A5 0%, #FF61A6 100%)' }}>
             <Toaster position="top-right" />
             <PWAInstallButton />
             <nav className="bg-white border-b border-gray-100 shadow-sm">
@@ -209,9 +209,9 @@ export default function Authenticated({ header, children }) {
                 </header>
             )}
 
-            <main className="py-8">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <main className="py-8 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg" style={{ borderRadius: '12px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
                         <div className="p-6 text-gray-900">{children}</div>
                     </div>
                 </div>

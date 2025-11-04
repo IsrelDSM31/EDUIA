@@ -31,6 +31,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/avatar', [ProfileApiController::class, 'uploadAvatar']);
 });
 
+// Chatbot API - OpenAI Integration (usa autenticación web con sesiones)
+// Rate limit más generoso: 20 requests por minuto (vs 60 por minuto del api por defecto)
+Route::middleware(['web', 'auth', 'throttle:20,1'])->group(function () {
+    Route::post('/chatbot', [\App\Http\Controllers\ChatBotController::class, 'ask']);
+});
+
 // Dashboard API
 Route::get('/dashboard/stats', [DashboardApiController::class, 'stats']);
 Route::get('/dashboard/recent-activities', [DashboardApiController::class, 'recentActivities']);
@@ -100,7 +106,7 @@ Route::get('/attendance-management/students/{id}/attendance', [AttendanceManagem
 Route::post('/attendance-management/students/{id}/attendance', [AttendanceManagementApiController::class, 'storeOrUpdate']);
 Route::delete('/attendance-management/students/{studentId}/attendance/{attendanceId}', [AttendanceManagementApiController::class, 'destroy']);
 
-// Chatbot API
+// Chatbot API - Internal simple responses (sin autenticación para uso interno)
 Route::post('/chatbot/message', [ChatbotApiController::class, 'sendMessage']);
 Route::get('/chatbot/history', [ChatbotApiController::class, 'getConversationHistory']);
 

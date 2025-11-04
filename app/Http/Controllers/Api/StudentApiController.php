@@ -553,25 +553,89 @@ class StudentApiController extends ApiController
 
     public function riskAnalysis($id): JsonResponse
     {
-        $student = Student::find($id);
+        $student = Student::with(['grades', 'attendances'])->find($id);
 
         if (!$student) {
             return $this->notFoundResponse('Student not found');
         }
 
+        // Intentar obtener predicción de la IA primero
+        $mlService = app(\App\Services\RiskPredictionService::class);
+        $mlPrediction = $mlService->predictRisk($student);
+
+        // Si hay predicción de ML, usarla
+        if ($mlPrediction && isset($mlPrediction['source']) && $mlPrediction['source'] === 'ml') {
+            // Calcular métricas
+            $metrics = $this->calculateStudentMetricsForRisk($student);
+            
+            // Obtener recomendaciones
+            $riskController = app(\App\Http\Controllers\StudentRiskController::class);
+            $recommendations = $riskController->generateRecommendationsIA($metrics, $mlPrediction['risk_level']);
+
+            $data = [
+                'student_id' => $student->id,
+                'student_name' => $student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno,
+                'student_code' => $student->matricula,
+                'risk_level' => $mlPrediction['risk_level'],
+                'risk_score' => $mlPrediction['risk_score'],
+                'confidence' => $mlPrediction['confidence'] ?? $mlPrediction['risk_score'],
+                'probabilities' => $mlPrediction['probabilities'] ?? [],
+                'features_used' => $mlPrediction['features_used'] ?? [],
+                'source' => 'ml',
+                'metrics' => $metrics,
+                'recommendations' => $recommendations,
+                'message' => 'Predicción realizada usando Machine Learning',
+                'ml_service_available' => true,
+                'last_analysis' => now(),
+            ];
+
+            return $this->successResponse($data, 'Student risk analysis retrieved successfully');
+        }
+
+        // Fallback: usar datos de StudentRisk si existen
         $latestRisk = $student->studentRisks()->latest()->first();
+
+        // Si no hay riesgo guardado, calcular usando reglas heurísticas
+        if (!$latestRisk) {
+            $riskController = app(\App\Http\Controllers\StudentRiskController::class);
+            $riskResult = $riskController->calculateRiskScore($student);
+            $latestRisk = $student->studentRisks()->latest()->first();
+        }
 
         $data = [
             'student_id' => $student->id,
             'student_name' => $student->nombre . ' ' . $student->apellido_paterno . ' ' . $student->apellido_materno,
             'student_code' => $student->matricula,
-            'risk_level' => $latestRisk->risk_level ?? 'none',
+            'risk_level' => $latestRisk->risk_level ?? 'bajo',
             'risk_score' => $latestRisk->risk_score ?? 0,
-            'risk_factors' => $latestRisk->risk_factors ? json_decode($latestRisk->risk_factors) : [],
-            'recommendations' => $latestRisk->recommendations ?? 'Sin recomendaciones',
+            'confidence' => $latestRisk->risk_score ?? 0,
+            'probabilities' => [],
+            'features_used' => [],
+            'source' => 'rules',
+            'metrics' => $latestRisk->performance_metrics ?? $this->calculateStudentMetricsForRisk($student),
+            'recommendations' => $latestRisk->intervention_recommendations ?? [],
+            'message' => 'Predicción realizada usando reglas heurísticas (servicio ML no disponible)',
+            'ml_service_available' => false,
             'last_analysis' => $latestRisk->updated_at ?? now(),
         ];
 
         return $this->successResponse($data, 'Student risk analysis retrieved successfully');
+    }
+
+    private function calculateStudentMetricsForRisk($student)
+    {
+        $totalClasses = $student->attendances->count();
+        $attendedClasses = $student->attendances->where('status', 'present')->count();
+        $attendanceRate = $totalClasses > 0 ? $attendedClasses / $totalClasses : 0;
+
+        $grades = $student->grades;
+        $gradeAverage = $grades->avg('promedio_final') ?? 0;
+        $failedSubjects = $grades->where('promedio_final', '<', 7)->count();
+
+        return [
+            'attendance_rate' => $attendanceRate,
+            'grade_average' => $gradeAverage,
+            'failed_subjects' => $failedSubjects,
+        ];
     }
 } 

@@ -63,8 +63,8 @@ class AttendanceController extends Controller
                 'attendance' => array_merge(
                     $attendance->toArray(),
                     [
-                        'student_name' => $attendance->student->nombre . ' ' . $attendance->student->apellido_paterno,
-                        'subject_name' => $attendance->subject->name,
+                        'student_name' => $attendance->student ? ($attendance->student->nombre . ' ' . ($attendance->student->apellido_paterno ?? '')) : 'Estudiante eliminado',
+                        'subject_name' => $attendance->subject ? $attendance->subject->name : 'Materia eliminada',
                     ]
                 )
             ]);

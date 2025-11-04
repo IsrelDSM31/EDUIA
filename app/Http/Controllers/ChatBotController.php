@@ -25,8 +25,21 @@ class ChatBotController extends Controller
             $attempt++;
             
             try {
+                $apiKey = env('OPENAI_API_KEY');
+                
+                if (empty($apiKey)) {
+                    Log::error('OpenAI API Key not configured');
+                    return response()->json([
+                        'error' => 'El servicio de IA no está configurado. Contacta al administrador.',
+                        'choices' => [['message' => ['content' => 'Lo siento, el servicio de IA no está disponible en este momento.']]]
+                    ], 503);
+                }
+                
                 $response = Http::timeout(30)
-                    ->withToken(env('OPENAI_API_KEY'))
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Content-Type' => 'application/json'
+                    ])
                     ->post('https://api.openai.com/v1/chat/completions', [
                         'model' => 'gpt-3.5-turbo',
                         'messages' => [
@@ -64,17 +77,22 @@ class ChatBotController extends Controller
                         'response' => $errorBody
                     ]);
                     
+                    // Intentar parsear el retry_after del header de OpenAI si está disponible
+                    $retryAfter = $response->header('retry-after');
+                    $retrySeconds = $retryAfter ? (int)$retryAfter : (30 + ($attempt * 10)); // 30s, 40s, 50s
+                    
                     if ($attempt < $maxRetries) {
-                        // Esperar antes del siguiente intento (backoff exponencial)
-                        $delay = pow(2, $attempt) * 1000; // 2s, 4s, 8s
+                        // Esperar antes del siguiente intento (backoff exponencial más largo)
+                        $delay = pow(2, $attempt) * 2000; // 2s, 4s, 8s (aumentado)
                         usleep($delay * 1000); // Convertir a microsegundos
                         continue; // Intentar de nuevo
                     }
                     
                     return response()->json([
-                        'error' => 'El servicio de IA está temporalmente sobrecargado. Por favor espera un momento antes de hacer otra pregunta.',
-                        'retry_after' => 60
-                    ], 429);
+                        'error' => "El servicio de IA está temporalmente sobrecargado. Por favor espera {$retrySeconds} segundos antes de hacer otra pregunta.",
+                        'retry_after' => $retrySeconds
+                    ], 429)
+                    ->header('Retry-After', $retrySeconds);
                 }
                 
                 if ($statusCode === 401) {

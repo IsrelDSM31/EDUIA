@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => 'cookie',
+    'driver' => env('SESSION_DRIVER', 'file'), // Cambiar a file para mejor estabilidad
 
     /*
     |--------------------------------------------------------------------------
@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 480), // Aumentado a 8 horas
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
@@ -200,6 +200,16 @@ return [
     */
 
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | CSRF Cookie Name
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the name of the cookie used to store the CSRF token.
+    |
+    */
+    'csrf_cookie_name' => env('CSRF_COOKIE_NAME', 'XSRF-TOKEN'),
 
     /*
     |--------------------------------------------------------------------------

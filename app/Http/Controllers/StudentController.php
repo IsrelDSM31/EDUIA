@@ -18,10 +18,12 @@ class StudentController extends Controller
 {
     public function index()
     {
+        $students = Student::with(['group', 'user'])
+            ->latest()
+            ->get(); // Cambiar a get() en lugar de paginate() para mostrar todos
+        
         return Inertia::render('Students/Index', [
-            'students' => Student::with(['group', 'user'])
-                ->latest()
-                ->paginate(10),
+            'students' => $students,
             'groups' => Group::all(),
         ]);
     }
@@ -75,9 +77,10 @@ class StudentController extends Controller
         ]);
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'student' => $student]);
+            return response()->json(['success' => true, 'student' => $student->load(['group', 'user'])]);
         }
-        return redirect()->back()->with('success', 'Estudiante creado correctamente.');
+        // Redirigir a la página de estudiantes para mostrar el nuevo registro
+        return redirect()->route('students.index')->with('success', 'Estudiante creado correctamente.');
     }
 
     public function show(Student $student)
@@ -90,32 +93,59 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,' . $student->user_id,
+            'nombre' => 'required|string',
+            'apellido_paterno' => 'required|string',
+            'apellido_materno' => 'nullable|string',
             'group_id' => 'required|exists:groups,id',
-            'curp' => 'required|string|unique:students,curp,' . $student->id,
+            'curp' => 'nullable|string|unique:students,curp,' . $student->id,
             'birth_date' => 'required|date',
             'blood_type' => 'nullable|string',
             'allergies' => 'nullable|string',
-            'emergency_contact' => 'required|array',
-            'emergency_contact.name' => 'required|string',
-            'emergency_contact.phone' => 'required|string',
-            'emergency_contact.relationship' => 'required|string',
-            'parent_data' => 'required|array',
-            'parent_data.*.name' => 'required|string',
-            'parent_data.*.phone' => 'required|string',
-            'parent_data.*.email' => 'required|email',
-            'parent_data.*.occupation' => 'nullable|string',
-            'parent_data.*.relationship' => 'required|string',
+            'emergency_contact' => 'nullable|array',
+            'emergency_contact.name' => 'nullable|string',
+            'emergency_contact.phone' => 'nullable|string',
+            'emergency_contact.relationship' => 'nullable|string',
+            'parent_data' => 'nullable|array',
         ]);
 
-        $student->user->update([
-            'name' => $request->name,
-            'email' => $request->email,
+        // Actualizar datos del estudiante
+        $studentData = $request->except(['name', 'email', 'emergency_contact', 'parent_data']);
+        
+        // Convertir emergency_contact y parent_data a JSON si existen
+        if ($request->has('emergency_contact')) {
+            $studentData['emergency_contact'] = json_encode($request->emergency_contact);
+        }
+        if ($request->has('parent_data')) {
+            $studentData['parent_data'] = json_encode($request->parent_data);
+        }
+        
+        $oldData = $student->toArray();
+        $student->update($studentData);
+        
+        // Actualizar usuario si existe - construir nombre completo desde los campos del estudiante
+        if ($student->user) {
+            $userData = [
+                'name' => trim($request->nombre . ' ' . $request->apellido_paterno . ' ' . ($request->apellido_materno ?? '')),
+            ];
+            $student->user->update($userData);
+        }
+
+        // Registro en bitácora para actualización
+        ChangeLog::create([
+            'user_id' => Auth::id(),
+            'model_type' => Student::class,
+            'model_id' => $student->id,
+            'action' => 'update',
+            'changes' => [
+                'before' => $oldData,
+                'after' => $student->fresh()->toArray(),
+            ],
         ]);
 
-        $student->update($request->except(['name', 'email']));
-
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'student' => $student->load(['group', 'user'])]);
+        }
+        
         return redirect()->back()->with('success', 'Estudiante actualizado correctamente.');
     }
 

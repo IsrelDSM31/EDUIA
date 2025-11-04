@@ -1,15 +1,9 @@
-const CACHE_NAME = 'iaedu1-v1.0.0';
+const CACHE_NAME = 'iaedu1-v1.0.1'; // Incrementar versión para forzar actualización
+// Solo cachear recursos estáticos, NO rutas dinámicas
 const urlsToCache = [
-    '/dashboard',
-    '/students',
-    '/grades',
-    '/attendance',
-    '/schedule',
-    '/alerts',
-    '/css/app.css',
-    '/js/app.js',
     '/images/fondo.jpg',
-    '/favicon.ico'
+    '/favicon.ico',
+    '/manifest.json'
 ];
 
 // Instalación del Service Worker
@@ -48,48 +42,112 @@ self.addEventListener('activate', (event) => {
 
 // Interceptar peticiones
 self.addEventListener('fetch', (event) => {
-    // No interceptar peticiones de navegación a la raíz para evitar problemas de redirección
-    if (event.request.url === 'http://127.0.0.1:8000/' || 
-        event.request.url === 'http://localhost:8000/' ||
-        event.request.url === 'http://127.0.0.1:8000' || 
-        event.request.url === 'http://localhost:8000') {
+    const url = new URL(event.request.url);
+    
+    // Ignorar peticiones de extensiones de Chrome
+    if (url.protocol === 'chrome-extension:' || url.protocol === 'chrome:' || url.protocol === 'moz-extension:') {
         return;
+    }
+    
+    // Ignorar peticiones a Vite HMR
+    if (url.hostname === 'localhost' && (url.port === '5173' || url.port === '5174')) {
+        return;
+    }
+    
+    // CRÍTICO: NO interceptar peticiones POST, PUT, DELETE, PATCH - deben ir directo al servidor
+    const method = event.request.method;
+    if (method !== 'GET' && method !== 'HEAD') {
+        // Permitir que las peticiones mutativas pasen directamente sin cache
+        return;
+    }
+    
+    // No interceptar peticiones de navegación a la raíz para evitar problemas de redirección
+    if (url.pathname === '/' && (url.hostname === '127.0.0.1' || url.hostname === 'localhost')) {
+        return;
+    }
+    
+    // Ignorar peticiones que no son HTTP/HTTPS
+    if (!event.request.url.startsWith('http')) {
+        return;
+    }
+
+    // NO cachear peticiones a rutas de API o rutas dinámicas
+    const isApiRoute = url.pathname.startsWith('/api/') || 
+                       url.pathname.startsWith('/sanctum/') ||
+                       url.pathname.includes('/students') ||
+                       url.pathname.includes('/grades') ||
+                       url.pathname.includes('/attendance') ||
+                       url.pathname.includes('/alerts') ||
+                       url.pathname.includes('/dashboard') ||
+                       url.pathname.includes('/profile');
+    
+    // Solo cachear recursos estáticos (CSS, JS, imágenes, fuentes)
+    const isStaticResource = url.pathname.match(/\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)$/i) ||
+                             url.pathname.startsWith('/build/') ||
+                             url.pathname.startsWith('/css/') ||
+                             url.pathname.startsWith('/js/') ||
+                             url.pathname.startsWith('/images/') ||
+                             url.pathname.startsWith('/fonts/');
+
+    // Si es una ruta dinámica o API, NO usar cache
+    if (isApiRoute && !isStaticResource) {
+        // Pasar directamente al servidor sin cache
+        return fetch(event.request);
     }
 
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                // Si está en cache, devolverlo
-                if (response) {
+                // Si está en cache y es un recurso estático, devolverlo
+                if (response && isStaticResource) {
                     return response;
                 }
 
                 // Si no está en cache, hacer la petición
                 return fetch(event.request, {
-                    redirect: 'follow' // Permitir redirecciones
+                    redirect: 'follow',
+                    cache: isApiRoute ? 'no-store' : 'default' // No cachear rutas dinámicas
                 })
                     .then((response) => {
-                        // Verificar que la respuesta sea válida
+                        // Solo cachear recursos estáticos exitosos
                         if (!response || response.status !== 200 || response.type !== 'basic') {
                             return response;
                         }
 
-                        // Clonar la respuesta
+                        // Solo cachear recursos estáticos
+                        if (!isStaticResource) {
+                            return response;
+                        }
+
+                        // Verificar que el tipo de respuesta sea cacheable
+                        const contentType = response.headers.get('content-type') || '';
+                        if (contentType.indexOf('text/html') !== -1 && isApiRoute) {
+                            // No cachear HTML de rutas dinámicas
+                            return response;
+                        }
+
+                        // Clonar la respuesta solo para recursos estáticos
                         const responseToCache = response.clone();
 
-                        // Guardar en cache para futuras peticiones
+                        // Guardar en cache solo recursos estáticos
                         caches.open(CACHE_NAME)
                             .then((cache) => {
-                                cache.put(event.request, responseToCache);
+                                try {
+                                    cache.put(event.request, responseToCache);
+                                } catch (error) {
+                                    console.warn('Error al guardar en cache:', error);
+                                }
                             });
 
                         return response;
                     })
-                    .catch(() => {
-                        // Si falla la petición y es una página, mostrar página offline
-                        if (event.request.destination === 'document') {
+                    .catch((error) => {
+                        console.warn('Error en fetch:', error);
+                        // Si falla la petición y es una página, mostrar página offline solo para recursos estáticos
+                        if (event.request.destination === 'document' && isStaticResource) {
                             return caches.match('/offline.html');
                         }
+                        throw error;
                     });
             })
     );

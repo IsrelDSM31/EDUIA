@@ -3,7 +3,7 @@ import { Card } from '@/Components/UI/Card';
 import { router } from '@inertiajs/react';
 import toast from 'react-hot-toast';
 
-export default function StudentsModule({ stats, showToast, showLoader }) {
+export default function StudentsModule({ students: studentsProp, groups: groupsProp, stats, showToast, showLoader }) {
     const [form, setForm] = useState({
         matricula: '',
         nombre: '',
@@ -18,7 +18,24 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
     const [importMessage, setImportMessage] = useState('');
     const [importError, setImportError] = useState('');
 
-    const students = stats?.students || [];
+    // Usar students y groups directamente del prop, o de stats como fallback
+    // Manejar paginación de Laravel (students.data) o array directo
+    let students = [];
+    if (studentsProp) {
+        // Si tiene estructura de paginación de Laravel
+        if (studentsProp.data && Array.isArray(studentsProp.data)) {
+            students = studentsProp.data;
+        } else if (Array.isArray(studentsProp)) {
+            students = studentsProp;
+        }
+    } else if (stats?.students) {
+        students = Array.isArray(stats.students) ? stats.students : [];
+    }
+    
+    const groups = groupsProp || stats?.groups || [];
+    
+    // Debug: mostrar en consola para verificar
+    // StudentsModule - students recibidos
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,6 +61,8 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
                 setError('');
                 // Mostrar mensaje de éxito
                 toast.success('¡Alumno agregado correctamente!');
+                // Recargar la página completa para mostrar el nuevo estudiante
+                router.visit('/students', { only: ['students', 'groups'], preserveState: false, preserveScroll: false });
             },
             onError: (errors) => {
                 // Manejar errores de validación
@@ -88,6 +107,8 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
                     group_id: '', 
                     birth_date: '' 
                 });
+                // Recargar la página para mostrar los cambios
+                router.visit('/students', { only: ['students', 'groups'], preserveState: false, preserveScroll: false });
             },
             onError: (errors) => {
                 const errorMessage = Object.values(errors).flat().join(', ');
@@ -102,6 +123,8 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
                     router.delete(`/students/${id}`, {
             onSuccess: () => {
                 toast.success('¡Estudiante eliminado correctamente!');
+                // Recargar la página para actualizar la lista
+                router.visit('/students', { only: ['students', 'groups'], preserveState: false, preserveScroll: false });
             },
             onError: () => {
                 toast.error('Error al eliminar estudiante.');
@@ -243,7 +266,7 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
                             required
                         >
                             <option value="">Selecciona un grupo</option>
-                            {(stats?.groups || []).map(group => (
+                            {groups.map(group => (
                                 <option key={group.id} value={group.id}>
                                     {group.name}
                                 </option>
@@ -283,18 +306,26 @@ export default function StudentsModule({ stats, showToast, showLoader }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredStudents.map(student => (
-                                <tr key={student.id}>
-                                    <td className="border border-gray-300 px-2 py-1">{student.matricula}</td>
-                                    <td className="border border-gray-300 px-2 py-1">{student.apellido_paterno} {student.apellido_materno} {student.nombre}</td>
-                                    <td className="border border-gray-300 px-2 py-1">{student.group?.name}</td>
-                                    <td className="border border-gray-300 px-2 py-1">
-                                        <button onClick={() => handleView(student)} className="text-blue-500 hover:text-blue-700">Ver</button>
-                                        <button onClick={() => handleEdit(student)} className="ml-2 text-yellow-500 hover:text-yellow-700">Editar</button>
-                                        <button onClick={() => handleDelete(student.id)} className="ml-2 text-red-500 hover:text-red-700">Eliminar</button>
+                            {filteredStudents.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="border border-gray-300 px-2 py-4 text-center text-gray-500">
+                                        {search ? 'No se encontraron estudiantes con ese criterio de búsqueda.' : 'No hay estudiantes registrados.'}
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredStudents.map(student => (
+                                    <tr key={student.id}>
+                                        <td className="border border-gray-300 px-2 py-1">{student.matricula}</td>
+                                        <td className="border border-gray-300 px-2 py-1">{student.apellido_paterno} {student.apellido_materno} {student.nombre}</td>
+                                        <td className="border border-gray-300 px-2 py-1">{student.group?.name || 'Sin grupo'}</td>
+                                        <td className="border border-gray-300 px-2 py-1">
+                                            <button onClick={() => handleView(student)} className="text-blue-500 hover:text-blue-700">Ver</button>
+                                            <button onClick={() => handleEdit(student)} className="ml-2 text-yellow-500 hover:text-yellow-700">Editar</button>
+                                            <button onClick={() => handleDelete(student.id)} className="ml-2 text-red-500 hover:text-red-700">Eliminar</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

@@ -31,6 +31,7 @@ class Alert extends Model
         'title',
         'description',
         'urgency',
+        'status',
         'evidence',
         'suggested_actions',
         'intervention_plan',

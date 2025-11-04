@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
 export default function ChatBot() {
@@ -12,9 +12,22 @@ export default function ChatBot() {
   const dragData = useRef({ dragging: false, offsetX: 0, offsetY: 0, moved: false });
   const lastRequestTime = useRef(0);
   const requestTimeout = useRef(null);
+  const countdownInterval = useRef(null);
 
-  // Rate limiting: máximo 1 petición cada 3 segundos
-  const RATE_LIMIT_DELAY = 3000;
+  // Limpiar intervalos al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (countdownInterval.current) {
+        clearInterval(countdownInterval.current);
+      }
+      if (requestTimeout.current) {
+        clearTimeout(requestTimeout.current);
+      }
+    };
+  }, []);
+
+  // Rate limiting: máximo 1 petición cada 5 segundos (más conservador para evitar 429)
+  const RATE_LIMIT_DELAY = 5000;
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || loading) return;
@@ -46,8 +59,28 @@ export default function ChatBot() {
     }]);
 
     try {
-      const res = await axios.post('/api/chatbot', { question: userMsg.text });
-      const aiText = res.data.choices?.[0]?.message?.content || 'No entendí, ¿puedes repetir?';
+      // Obtener token CSRF del meta tag
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      
+      const res = await axios.post('/api/chatbot', 
+        { question: userMsg.text },
+        {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          withCredentials: true
+        }
+      );
+      
+      // Manejar respuesta con error en el formato esperado
+      if (res.data.error && !res.data.choices) {
+        throw new Error(res.data.error);
+      }
+      
+      const aiText = res.data.choices?.[0]?.message?.content || res.data.error || 'No entendí, ¿puedes repetir?';
       
       // Remover mensaje de "pensando" y agregar respuesta
       setMessages(msgs => {
@@ -65,9 +98,39 @@ export default function ChatBot() {
         
         switch (status) {
           case 429:
-            errorMessage = data.error || 'Demasiadas peticiones. Por favor espera un momento antes de hacer otra pregunta.';
-            // Esperar 60 segundos antes de permitir otra petición
-            lastRequestTime.current = Date.now() + 60000;
+            errorMessage = data.error || 'Demasiadas peticiones. Por favor espera 30 segundos antes de hacer otra pregunta.';
+            // Esperar 30 segundos antes de permitir otra petición (reducido de 60)
+            lastRequestTime.current = Date.now() + 30000;
+            
+            // Mostrar contador de tiempo restante
+            let remainingSeconds = 30;
+            // Limpiar intervalo anterior si existe
+            if (countdownInterval.current) {
+              clearInterval(countdownInterval.current);
+            }
+            countdownInterval.current = setInterval(() => {
+              remainingSeconds--;
+              if (remainingSeconds > 0) {
+                setMessages(msgs => {
+                  const lastMsg = msgs[msgs.length - 1];
+                  if (lastMsg && lastMsg.from === 'bot' && lastMsg.text.includes('espera')) {
+                    const newMsgs = [...msgs];
+                    newMsgs[newMsgs.length - 1] = {
+                      ...lastMsg,
+                      text: `⏳ Demasiadas peticiones. Por favor espera ${remainingSeconds} segundos antes de hacer otra pregunta.`
+                    };
+                    return newMsgs;
+                  }
+                  return msgs;
+                });
+              } else {
+                if (countdownInterval.current) {
+                  clearInterval(countdownInterval.current);
+                  countdownInterval.current = null;
+                }
+              }
+            }, 1000);
+            
             break;
           case 500:
             errorMessage = data.error || 'Error del servidor. Por favor intenta de nuevo en unos momentos.';

@@ -47,58 +47,65 @@ export default function Index({ auth, alerts, students }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Sistema de Alertas</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight mb-4">Sistema de Alertas</h2>}
         >
             <Head title="Alertas" />
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <Card className="p-6">
-                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                            <label htmlFor="search" className="sr-only">Buscar</label>
-                            <input
-                                id="search"
-                                type="text"
-                                className="border rounded px-3 py-2 w-full md:w-1/4"
-                                placeholder="Buscar por nombre o descripción..."
-                                value={filters.search}
-                                onChange={e => setFilters({...filters, search: e.target.value})}
-                            />
-                            <label htmlFor="urgency" className="sr-only">Urgencia</label>
-                            <select
-                                id="urgency"
-                                className="border rounded px-3 py-2 w-full md:w-1/6"
-                                value={filters.urgency}
-                                onChange={e => setFilters({...filters, urgency: e.target.value})}
-                            >
-                                <option value="">Todas las urgencias</option>
-                                <option value="high">Alta</option>
-                                <option value="medium">Media</option>
-                                <option value="low">Baja</option>
-                            </select>
-                            <label htmlFor="type" className="sr-only">Tipo</label>
-                            <select
-                                id="type"
-                                className="border rounded px-3 py-2 w-full md:w-1/6"
-                                value={filters.type}
-                                onChange={e => setFilters({...filters, type: e.target.value})}
-                            >
-                                <option value="">Todos los tipos</option>
-                                <option value="attendance">Asistencia</option>
-                                <option value="academic">Académico</option>
-                                <option value="behavioral">Conductual</option>
-                            </select>
-                            <select
-                                className="border rounded px-3 py-2 w-full md:w-1/6"
-                                value={filters.riskLevel}
-                                onChange={e => setFilters({...filters, riskLevel: e.target.value})}
-                            >
-                                <option value="">Todos los niveles de riesgo</option>
-                                <option value="alto">Alto</option>
-                                <option value="medio">Medio</option>
-                                <option value="bajo">Bajo</option>
-                                <option value="no evaluado">No evaluado</option>
-                            </select>
+                    <Card className="p-6 bg-white">
+                        <div className="mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="md:col-span-1">
+                                    <input
+                                        id="search"
+                                        type="text"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Buscar por nombre o descripción..."
+                                        value={filters.search}
+                                        onChange={e => setFilters({...filters, search: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <select
+                                        id="urgency"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        value={filters.urgency}
+                                        onChange={e => setFilters({...filters, urgency: e.target.value})}
+                                    >
+                                        <option value="">Todas las urgencias</option>
+                                        <option value="high">Alta</option>
+                                        <option value="medium">Media</option>
+                                        <option value="low">Baja</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select
+                                        id="type"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        value={filters.type}
+                                        onChange={e => setFilters({...filters, type: e.target.value})}
+                                    >
+                                        <option value="">Todos los tipos</option>
+                                        <option value="attendance">Asistencia</option>
+                                        <option value="academic">Académico</option>
+                                        <option value="behavioral">Conductual</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        value={filters.riskLevel}
+                                        onChange={e => setFilters({...filters, riskLevel: e.target.value})}
+                                    >
+                                        <option value="">Todos los niveles de riesgo</option>
+                                        <option value="alto">Alto</option>
+                                        <option value="medio">Medio</option>
+                                        <option value="bajo">Bajo</option>
+                                        <option value="no evaluado">No evaluado</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto">
