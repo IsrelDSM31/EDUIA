@@ -144,35 +144,7 @@ window.axios.interceptors.response.use(
     function (error) {
         if (error.response && error.response.status === 419) {
             // Token CSRF expirado - intentar obtener uno nuevo sin mostrar error
-            const newToken = getCsrfToken();
-            
-            if (newToken && error.config) {
-                // Actualizar el token y reintentar la petición automáticamente
-                window.axios.defaults.headers.common['X-CSRF-TOKEN'] = newToken;
-                csrfTokenReady = true;
-                
-                // Actualizar el header de la petición original
-                if (error.config.headers) {
-                    error.config.headers['X-CSRF-TOKEN'] = newToken;
-                }
-                
-                // Reintentar la petición automáticamente (solo una vez)
-                if (!error.config._retry) {
-                    error.config._retry = true;
-                    return window.axios(error.config);
-                }
-            }
-            
-            // Si después de reintentar sigue fallando, solo entonces recargar
-            const method = error.config?.method?.toUpperCase();
-            if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-                // Solo recargar si ya se reintentó
-                if (error.config?._retry) {
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 100);
-                }
-            }
+            // Evitamos recargar automáticamente; que la app maneje el error manualmente.
         }
         return Promise.reject(error);
     }

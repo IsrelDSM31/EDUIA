@@ -11,7 +11,7 @@ import ChatBot from '@/Components/ChatBot';
 import AdminGlobalNotifications from '@/Components/AdminGlobalNotifications';
 
 export default function Authenticated({ header, children }) {
-    const { auth } = usePage().props;
+    const { auth, csrf_token } = usePage().props;
     const user = auth?.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -140,7 +140,13 @@ export default function Authenticated({ header, children }) {
                                         <Dropdown.Link href={route('profile.edit')} className="nav-link">
                                             Perfil
                                         </Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="nav-link text-red-600 hover:text-red-700">
+                                        <Dropdown.Link
+                                            href={route('logout')}
+                                            method="post"
+                                            data={{ _token: csrf_token }}
+                                            as="button"
+                                            className="nav-link text-red-600 hover:text-red-700"
+                                        >
                                             Cerrar Sesión
                                         </Dropdown.Link>
                                     </Dropdown.Content>
@@ -195,7 +201,7 @@ export default function Authenticated({ header, children }) {
 
                         <div className="mt-3 space-y-1">
                             <ResponsiveNavLink href={route('profile.edit')}>Perfil</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
+                            <ResponsiveNavLink method="post" href={route('logout')} data={{ _token: csrf_token }} as="button">
                                 Cerrar Sesión
                             </ResponsiveNavLink>
                         </div>

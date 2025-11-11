@@ -16,10 +16,12 @@ use App\Http\Controllers\Api\ChatbotApiController;
 use App\Http\Controllers\Api\ProfileApiController;
 use App\Http\Controllers\Api\GoogleClassroomApiController;
 use App\Http\Controllers\Api\GamificationApiController;
+use App\Http\Controllers\Api\ScheduleApiController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\MessagingController;
 
 // Auth API
+Route::post('/auth/register', [App\Http\Controllers\Api\AuthApiController::class, 'register']);
 Route::post('/auth/login', [App\Http\Controllers\Api\AuthApiController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [App\Http\Controllers\Api\AuthApiController::class, 'logout']);
@@ -67,6 +69,7 @@ Route::get('/teachers/{id}/courses', [TeacherApiController::class, 'courses']);
 
 // Grades API
 Route::get('/grades', [GradeApiController::class, 'index']);
+Route::get('/grades/statistics', [GradeApiController::class, 'statistics']);
 Route::get('/grades/{id}', [GradeApiController::class, 'show']);
 Route::post('/grades', [GradeApiController::class, 'store']);
 Route::put('/grades/{id}', [GradeApiController::class, 'update']);
@@ -74,13 +77,13 @@ Route::delete('/grades/{id}', [GradeApiController::class, 'destroy']);
 
 // Attendance API
 Route::get('/attendance', [AttendanceApiController::class, 'index']);
+Route::get('/attendance/statistics', [AttendanceApiController::class, 'statistics']);
 Route::get('/attendance/{id}', [AttendanceApiController::class, 'show']);
 Route::post('/attendance', [AttendanceApiController::class, 'store']);
 Route::post('/attendance/bulk', [AttendanceApiController::class, 'bulkStore']);
 Route::post('/attendance/justify', [AttendanceApiController::class, 'justify']);
 Route::put('/attendance/{id}', [AttendanceApiController::class, 'update']);
 Route::delete('/attendance/{id}', [AttendanceApiController::class, 'destroy']);
-Route::get('/attendance/statistics', [AttendanceApiController::class, 'statistics']);
 
 // Alerts API
 Route::get('/alerts', [AlertApiController::class, 'index']);
@@ -94,6 +97,9 @@ Route::delete('/alerts/{id}', [AlertApiController::class, 'destroy']);
 Route::get('/risk-analysis', [RiskAnalysisApiController::class, 'index']);
 Route::get('/risk-analysis/statistics', [RiskAnalysisApiController::class, 'statistics']);
 Route::post('/risk-analysis/predict', [RiskAnalysisApiController::class, 'predict']);
+
+// Schedules API
+Route::get('/schedules', [ScheduleApiController::class, 'index']);
 
 // Grade Management API (Sistema completo de calificaciones)
 Route::get('/grade-management/students', [GradeManagementApiController::class, 'students']);
