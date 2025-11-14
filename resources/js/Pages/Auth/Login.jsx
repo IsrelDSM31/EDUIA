@@ -22,7 +22,7 @@ export default function Login({ status, canResetPassword }) {
                 <div className="text-center mb-8">
                     <ApplicationLogo className="h-20 w-auto mx-auto mb-4" />
                     <h2 className="text-2xl font-bold text-[#1E88E5]">EDUAI</h2>
-                    <p className="text-gray-600 mt-2">Inicia sesión para continuar</p>
+                    <p className="text-gray-600 mt-2">Inicia sesión para continuar testing</p>
                 </div>
 
                 {status && (
