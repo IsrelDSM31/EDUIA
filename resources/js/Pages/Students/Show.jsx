@@ -13,7 +13,7 @@ export default function StudentShow({ auth, student }) {
     useEffect(() => {
         const fetchRiskData = async () => {
             try {
-                const response = await axios.get(`/api/student-risk/${student.id}`);
+                const response = await axios.get(`/api/students/${student.id}/risk-analysis`);
                 setRiskData(response.data);
             } catch (error) {
                 console.error('Error fetching risk data:', error);
@@ -52,7 +52,10 @@ export default function StudentShow({ auth, student }) {
     };
 
     const metrics = calculateMetrics();
-    const riskLevel = riskData?.risk_level || 'bajo';
+    const riskLevel = riskData?.data?.risk_level || riskData?.risk_level || 'bajo';
+    
+    // Extraer datos del response si están en data
+    const riskDataFormatted = riskData?.data || riskData;
 
     return (
         <AuthenticatedLayout
@@ -134,6 +137,32 @@ export default function StudentShow({ auth, student }) {
                                     </div>
                                 ) : (
                                     <div>
+                                        {/* Indicador de fuente (ML o Reglas) */}
+                                        {riskDataFormatted?.source === 'ml' && (
+                                            <div className="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div className="flex items-center">
+                                                    <svg className="w-4 h-4 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                                                    </svg>
+                                                    <span className="text-xs font-semibold text-blue-800">Inteligencia Artificial</span>
+                                                </div>
+                                                <p className="text-xs text-blue-600 mt-1">{riskDataFormatted?.message || 'Predicción realizada usando Machine Learning'}</p>
+                                            </div>
+                                        )}
+
+                                        {riskDataFormatted?.source === 'rules' && (
+                                            <div className="mb-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                                <div className="flex items-center">
+                                                    <svg className="w-4 h-4 text-gray-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                                    </svg>
+                                                    <span className="text-xs font-semibold text-gray-700">Reglas Heurísticas</span>
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">{riskDataFormatted?.message || 'Servicio ML no disponible'}</p>
+                                            </div>
+                                        )}
+
                                         <div className="mb-4">
                                             <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
                                                 riskLevel === 'alto' ? 'bg-red-100 text-red-800' :
@@ -144,8 +173,90 @@ export default function StudentShow({ auth, student }) {
                                             </span>
                                         </div>
 
+                                        {/* Información detallada de la IA */}
+                                        {riskDataFormatted?.source === 'ml' && (
+                                            <div className="mb-4 space-y-3">
+                                                {/* Confianza */}
+                                                {riskDataFormatted?.confidence && (
+                                                    <div className="p-3 bg-gray-50 rounded-lg">
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <span className="text-xs font-medium text-gray-700">Confianza del Modelo</span>
+                                                            <span className="text-xs font-bold text-gray-900">{(riskDataFormatted.confidence * 100).toFixed(1)}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div 
+                                                                className={`h-2 rounded-full ${
+                                                                    riskDataFormatted.confidence >= 0.7 ? 'bg-green-500' :
+                                                                    riskDataFormatted.confidence >= 0.5 ? 'bg-yellow-500' :
+                                                                    'bg-red-500'
+                                                                }`}
+                                                                style={{ width: `${riskDataFormatted.confidence * 100}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Probabilidades */}
+                                                {riskDataFormatted?.probabilities && Object.keys(riskDataFormatted.probabilities).length > 0 && (
+                                                    <div className="p-3 bg-gray-50 rounded-lg">
+                                                        <span className="text-xs font-medium text-gray-700 block mb-2">Probabilidades por Nivel</span>
+                                                        <div className="space-y-2">
+                                                            {Object.entries(riskDataFormatted.probabilities).map(([level, prob]) => (
+                                                                <div key={level} className="flex items-center justify-between">
+                                                                    <span className="text-xs text-gray-600 capitalize">{level}:</span>
+                                                                    <div className="flex items-center space-x-2 flex-1 ml-2">
+                                                                        <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                                                                            <div 
+                                                                                className={`h-1.5 rounded-full ${
+                                                                                    level === 'alto' ? 'bg-red-500' :
+                                                                                    level === 'medio' ? 'bg-yellow-500' :
+                                                                                    'bg-green-500'
+                                                                                }`}
+                                                                                style={{ width: `${(prob * 100)}%` }}
+                                                                            ></div>
+                                                                        </div>
+                                                                        <span className="text-xs font-semibold text-gray-900 w-12 text-right">{(prob * 100).toFixed(1)}%</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Características usadas */}
+                                                {riskDataFormatted?.features_used && Object.keys(riskDataFormatted.features_used).length > 0 && (
+                                                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                                        <span className="text-xs font-medium text-blue-800 block mb-2">Características Analizadas por la IA</span>
+                                                        <div className="space-y-1.5">
+                                                            {Object.entries(riskDataFormatted.features_used).map(([feature, value]) => (
+                                                                <div key={feature} className="flex justify-between items-center text-xs">
+                                                                    <span className="text-blue-700 capitalize">
+                                                                        {feature === 'grade_average' ? 'Promedio General' :
+                                                                         feature === 'attendance_rate' ? 'Tasa de Asistencia' :
+                                                                         feature === 'failed_subjects' ? 'Materias Reprobadas' :
+                                                                         feature === 'recent_improvement' ? 'Mejora Reciente' :
+                                                                         feature === 'group_id' ? 'Grupo' :
+                                                                         feature}
+                                                                    </span>
+                                                                    <span className="font-semibold text-blue-900">
+                                                                        {typeof value === 'number' 
+                                                                            ? feature === 'attendance_rate' 
+                                                                                ? `${(value * 100).toFixed(1)}%`
+                                                                                : feature === 'grade_average'
+                                                                                    ? value.toFixed(2)
+                                                                                    : value.toString()
+                                                                            : value}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {/* Panel de intervención IA */}
-                                        <InterventionPanel riskLevel={riskLevel} metrics={metrics} />
+                                        <InterventionPanel riskLevel={riskLevel} metrics={metrics} riskData={riskDataFormatted} />
                                     </div>
                                 )}
                             </Card>

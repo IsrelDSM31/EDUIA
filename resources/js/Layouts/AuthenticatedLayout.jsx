@@ -11,7 +11,7 @@ import ChatBot from '@/Components/ChatBot';
 import AdminGlobalNotifications from '@/Components/AdminGlobalNotifications';
 
 export default function Authenticated({ header, children }) {
-    const { auth } = usePage().props;
+    const { auth, csrf_token } = usePage().props;
     const user = auth?.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -48,7 +48,7 @@ export default function Authenticated({ header, children }) {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFD6A5 0%, #FF61A6 100%)' }}>
             <Toaster position="top-right" />
             <PWAInstallButton />
             <nav className="bg-white border-b border-gray-100 shadow-sm">
@@ -140,7 +140,13 @@ export default function Authenticated({ header, children }) {
                                         <Dropdown.Link href={route('profile.edit')} className="nav-link">
                                             Perfil
                                         </Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="nav-link text-red-600 hover:text-red-700">
+                                        <Dropdown.Link
+                                            href={route('logout')}
+                                            method="post"
+                                            data={{ _token: csrf_token }}
+                                            as="button"
+                                            className="nav-link text-red-600 hover:text-red-700"
+                                        >
                                             Cerrar Sesión
                                         </Dropdown.Link>
                                     </Dropdown.Content>
@@ -195,7 +201,7 @@ export default function Authenticated({ header, children }) {
 
                         <div className="mt-3 space-y-1">
                             <ResponsiveNavLink href={route('profile.edit')}>Perfil</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
+                            <ResponsiveNavLink method="post" href={route('logout')} data={{ _token: csrf_token }} as="button">
                                 Cerrar Sesión
                             </ResponsiveNavLink>
                         </div>
@@ -209,9 +215,9 @@ export default function Authenticated({ header, children }) {
                 </header>
             )}
 
-            <main className="py-8">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <main className="py-8 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg" style={{ borderRadius: '12px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
                         <div className="p-6 text-gray-900">{children}</div>
                     </div>
                 </div>

@@ -36,6 +36,7 @@ export default function AttendanceModule({ stats }) {
     const [justSubject, setJustSubject] = useState('');
     const [localAttendances, setLocalAttendances] = useState(stats?.attendances || []);
     const [quickJustify, setQuickJustify] = useState({ open: false, student: null, subject: null });
+    const [searchTerm, setSearchTerm] = useState('');
 
     const getToday = () => {
         const today = new Date();
@@ -379,7 +380,36 @@ export default function AttendanceModule({ stats }) {
             </div>
 
             <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Asistencias por Alumno y Materia</h3>
+                <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-4">Asistencias por Alumno y Materia</h3>
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex-1 md:flex-initial md:w-80">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Buscar por matrícula o nombre del alumno..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-10 py-2.5 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Limpiar búsqueda"
+                                >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 text-xs">
                         <thead className="bg-gray-50">
@@ -398,9 +428,30 @@ export default function AttendanceModule({ stats }) {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {(() => {
+                                // Filtrar attendanceSummary basado en el término de búsqueda
+                                const filteredSummary = searchTerm.trim() === '' 
+                                    ? attendanceSummary 
+                                    : attendanceSummary.filter(row => {
+                                        const searchLower = searchTerm.toLowerCase().trim();
+                                        const matriculaMatch = row.matricula?.toLowerCase().includes(searchLower);
+                                        const nombreMatch = row.nombre?.toLowerCase().includes(searchLower);
+                                        return matriculaMatch || nombreMatch;
+                                    });
+
+                                // Mostrar mensaje si no hay resultados
+                                if (filteredSummary.length === 0) {
+                                    return (
+                                        <tr>
+                                            <td colSpan="10" className="px-4 py-8 text-center text-gray-500">
+                                                No se encontraron alumnos que coincidan con "{searchTerm}"
+                                            </td>
+                                        </tr>
+                                    );
+                                }
+
                                 let lastMatricula = null;
                                 let colorToggle = false;
-                                return attendanceSummary.map((row, idx) => {
+                                return filteredSummary.map((row, idx) => {
                                     // Cambia el color cuando cambia el alumno
                                     if (row.matricula !== lastMatricula && !row.isGlobal) {
                                         colorToggle = !colorToggle;

@@ -29,12 +29,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Asegurar que siempre tengamos un token CSRF válido
+        $csrfToken = $request->session()->token();
+        
+        // Si por alguna razón no hay token, generar uno nuevo
+        if (!$csrfToken) {
+            $csrfToken = csrf_token();
+        }
+        
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
             ],
-            'csrf_token' => csrf_token(),
+            'csrf_token' => $csrfToken,
+            'csrfToken' => $csrfToken, // Alias para compatibilidad
         ];
     }
 }

@@ -138,5 +138,12 @@ class DatabaseSeeder extends Seeder
                 'group_id' => \App\Models\Group::first()->id, // Usar el primer grupo creado
             ]
         );
+
+        // Ejecutar seeders adicionales
+        $this->call([
+            AchievementsSeeder::class,
+            CalendarMessagingSeeder::class,
+            CompleteDataSeeder::class,
+        ]);
     }
 }

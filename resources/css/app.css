@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-    /* Tus estilos originales aquí */
+    /* Estilos de botones */
     .btn-primary {
         background-color: #1561F0 !important;
         color: #fff !important;
@@ -32,10 +32,78 @@
     .text-secondary {
         color: #86868B !important;
     }
+    
+    /* Estilos de navegación */
+    .nav-link {
+        color: #2563eb !important;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .nav-link:hover {
+        color: #1d4ed8 !important;
+    }
+    .nav-link.active {
+        color: #1e40af !important;
+        font-weight: 600;
+    }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: linear-gradient(180deg, #FFD6A5 0%, #FF61A6 100%) !important;
-  color: #fff !important;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
   font-family: 'Inter', 'Helvetica Neue', Arial, 'sans-serif';
+}
+
+/* Asegurar que los elementos respeten el layout */
+#app {
+  min-height: 100vh;
+}
+
+/* Fondo gradiente para páginas autenticadas */
+.authenticated-layout {
+  background: linear-gradient(180deg, #FFD6A5 0%, #FF61A6 100%) !important;
+  min-height: 100vh;
+}
+
+/* Estilos para el contenido principal */
+.main-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Asegurar que los elementos tengan el comportamiento correcto */
+input, select, textarea, button {
+  font-family: inherit;
+}
+
+/* Evitar que los elementos se apilen incorrectamente */
+.flex {
+  display: flex !important;
+}
+
+.grid {
+  display: grid !important;
+}
+
+.space-y-1 > * + * {
+  margin-top: 0.25rem !important;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+.space-x-4 > * + * {
+  margin-left: 1rem !important;
+}
+
+.gap-4 {
+  gap: 1rem !important;
 }

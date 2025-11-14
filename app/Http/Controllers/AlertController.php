@@ -51,4 +51,12 @@ class AlertController extends Controller
         }
         return redirect()->back()->with('success', 'Alerta creada correctamente.');
     }
+
+    public function show(Student $student)
+    {
+        return Inertia::render('Alerts/Show', [
+            'student' => $student->load(['group', 'user', 'alerts']),
+            'alerts' => $student->alerts()->latest()->get(),
+        ]);
+    }
 } 
