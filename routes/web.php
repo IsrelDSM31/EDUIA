@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckSubscription::c
     Route::prefix('alerts')->group(function () {
         Route::get('/', [AlertController::class, 'index'])->name('alerts.index');
         Route::post('/', [AlertController::class, 'store'])->name('alerts.store');
+        Route::get('/{student}', [AlertController::class, 'show'])->name('alerts.show');
     });
 
     // Rutas de eventos

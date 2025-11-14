@@ -399,13 +399,22 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                 };
             });
 
-            const response = await axios.post('/grades', {
-                student_id: parseInt(modalContext.studentId),
-                subject_id: parseInt(modalContext.subjectId),
-                evaluations: evaluationsToSend
+            // Verificar si ya existe una calificación (tiene ID)
+            const gradeId = modalContext.gradeObj?.id;
+            const url = gradeId ? `/grades/${gradeId}` : '/grades';
+            const method = gradeId ? 'PUT' : 'POST';
+
+            const response = await axios({
+                method: method,
+                url: url,
+                data: {
+                    student_id: parseInt(modalContext.studentId),
+                    subject_id: parseInt(modalContext.subjectId),
+                    evaluations: evaluationsToSend
+                }
             });
 
-            if (response.data.success) {
+            if (response.data.success || response.data.grade) {
                 toast.success(response.data.message);
                 // Notificación inteligente para estados de riesgo o reprobado
                 const estado = response.data.grade?.estado?.toLowerCase();
@@ -446,6 +455,11 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                     exam: '',
                     extra: ''
                 });
+                
+                // Recargar datos desde el servidor para asegurar que se muestren correctamente
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             } else {
                 throw new Error(response.data.message || 'Error al guardar las calificaciones');
             }
@@ -565,9 +579,15 @@ export default function GradesModule({ grades, subjects, rubrics }) {
                         </td>
                         {[0,1,2,3].map((evalIndex) => {
                             const realGrade = Array.isArray(grade) ? grade[0] : grade;
-                            const evalObj = mapEvaluationFields(Array.isArray(realGrade?.evaluations) && realGrade.evaluations[evalIndex]
-                                ? realGrade.evaluations[evalIndex]
-                                : null);
+                            // Asegurar que evaluations sea un array y tenga el elemento
+                            let evalData = null;
+                            if (Array.isArray(realGrade?.evaluations) && realGrade.evaluations[evalIndex]) {
+                                evalData = realGrade.evaluations[evalIndex];
+                            } else if (realGrade?.evaluations && typeof realGrade.evaluations === 'object' && !Array.isArray(realGrade.evaluations)) {
+                                // Si es un objeto, intentar acceder por índice
+                                evalData = Object.values(realGrade.evaluations)[evalIndex] || null;
+                            }
+                            const evalObj = mapEvaluationFields(evalData);
                             return (
                                 <td key={evalIndex}
                                     className="border border-gray-300 px-0.5 py-0.5 whitespace-nowrap align-middle text-center cursor-pointer hover:bg-blue-100"

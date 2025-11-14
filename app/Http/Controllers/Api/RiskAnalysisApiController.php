@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use App\Models\StudentRisk;
 use App\Models\Student;
+use App\Services\RiskPredictionService;
 
 class RiskAnalysisApiController extends ApiController
 {
@@ -80,11 +82,75 @@ class RiskAnalysisApiController extends ApiController
         return $this->successResponse($stats, 'Risk statistics retrieved successfully');
     }
 
-    public function predict(): JsonResponse
+    public function predict(Request $request): JsonResponse
     {
-        return $this->successResponse([
-            'message' => 'Prediction feature available'
-        ], 'Prediction endpoint ready');
+        try {
+            $request->validate([
+                'student_id' => 'required|exists:students,id'
+            ]);
+
+            $student = Student::with(['grades', 'attendances'])->findOrFail($request->student_id);
+            
+            // Intentar usar ML primero
+            $mlService = app(RiskPredictionService::class);
+            $prediction = $mlService->predictRisk($student);
+            
+            // Si ML no está disponible, usar el controlador de riesgo existente
+            if (!$prediction) {
+                $riskController = app(\App\Http\Controllers\StudentRiskController::class);
+                $riskResult = $riskController->calculateRiskScore($student);
+                
+                return $this->successResponse([
+                    'student_id' => $student->id,
+                    'risk_level' => $riskResult['risk_level'],
+                    'risk_score' => $riskResult['risk_score'] ?? 0,
+                    'source' => $riskResult['source'] ?? 'rules',
+                    'metrics' => $riskResult['metrics'],
+                    'recommendations' => $riskResult['recommendations'],
+                    'message' => 'Predicción realizada usando reglas heurísticas (servicio ML no disponible)'
+                ], 'Prediction completed');
+            }
+            
+            // Obtener recomendaciones
+            $metrics = $this->calculateStudentMetrics($student);
+            $recommendations = $this->generateRecommendations($prediction['risk_level'], $student);
+            
+            return $this->successResponse([
+                'student_id' => $student->id,
+                'risk_level' => $prediction['risk_level'],
+                'risk_score' => $prediction['risk_score'],
+                'confidence' => $prediction['confidence'] ?? $prediction['risk_score'],
+                'probabilities' => $prediction['probabilities'] ?? [],
+                'source' => 'ml',
+                'metrics' => $metrics,
+                'recommendations' => $recommendations,
+                'message' => 'Predicción realizada usando Machine Learning'
+            ], 'Prediction completed');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error al realizar predicción: ' . $e->getMessage(), 500);
+        }
+    }
+
+    private function calculateStudentMetrics(Student $student)
+    {
+        // Calcular tasa de asistencia
+        $totalClasses = $student->attendances->count();
+        $attendedClasses = $student->attendances->where('status', 'present')->count();
+        $attendanceRate = $totalClasses > 0 ? $attendedClasses / $totalClasses : 0;
+
+        // Promedio de calificaciones
+        $grades = $student->grades;
+        $gradeAverage = $grades->avg('promedio_final') ?? 0;
+
+        // Contar materias reprobadas
+        $failedSubjects = $grades->where('promedio_final', '<', 7)->count();
+
+        return [
+            'attendance_rate' => $attendanceRate,
+            'grade_average' => $gradeAverage,
+            'failed_subjects' => $failedSubjects,
+        ];
     }
 
     private function generateRiskFactors($risk, $student)

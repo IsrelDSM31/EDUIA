@@ -18,7 +18,7 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Iniciar Sesión" />
 
-            <div className="w-full max-w-sm mx-auto">
+            <div className="w-full max-w-md mx-auto px-4">
                 <div className="text-center mb-8">
                     <ApplicationLogo className="h-20 w-auto mx-auto mb-4" />
                     <h2 className="text-2xl font-bold text-[#1E88E5]">EDUAI</h2>

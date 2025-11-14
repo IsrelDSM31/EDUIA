@@ -19,6 +19,67 @@ class AuthApiController extends ApiController
 {
     /**
      * @OA\Post(
+     *     path="/api/auth/register",
+     *     summary="Registrar un nuevo usuario",
+     *     description="Crea un usuario y devuelve su información junto al token de acceso",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","password_confirmation"},
+     *             @OA\Property(property="name", type="string", example="Nuevo Usuario", description="Nombre completo"),
+     *             @OA\Property(property="email", type="string", format="email", example="nuevo@iaedu.com", description="Correo del usuario"),
+     *             @OA\Property(property="password", type="string", format="password", example="Secret123", description="Contraseña"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="Secret123", description="Confirmación de contraseña")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Registro exitoso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User registered successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user", ref="#/components/schemas/User"),
+     *                 @OA\Property(property="token", type="string", example="1|CN5...token")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Datos inválidos",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+            'password' => 'required|string|confirmed|min:8',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return $this->successResponse([
+            'user' => $user,
+            'token' => $token,
+        ], 'User registered successfully', 201);
+    }
+
+    /**
+     * @OA\Post(
      *     path="/api/auth/login",
      *     summary="Iniciar sesión de usuario",
      *     description="Autentica un usuario con email y contraseña, devuelve un token de acceso",

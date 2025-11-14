@@ -14,6 +14,7 @@ class StudentRisk extends Model
         'behavior_patterns',
         'intervention_recommendations',
         'progress_metrics',
+        'ml_data',
         'notes'
     ];
 
@@ -22,6 +23,7 @@ class StudentRisk extends Model
         'behavior_patterns' => 'array',
         'intervention_recommendations' => 'array',
         'progress_metrics' => 'array',
+        'ml_data' => 'array',
         'risk_score' => 'float'
     ];
 

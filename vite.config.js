@@ -15,9 +15,10 @@ export default defineConfig({
             host: 'localhost',
         },
         host: 'localhost',
-        port: 5174,
-        proxy: {
-            '/api': 'http://localhost:8000',
+        port: 5173,
+        strictPort: true,
+        watch: {
+            usePolling: true,
         },
     },
     resolve: {
@@ -25,4 +26,15 @@ export default defineConfig({
             '@': '/resources/js',
         },
     },
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
+        manifest: 'manifest.json', // Generar manifest en la raíz de build
+        rollupOptions: {
+            input: {
+                app: 'resources/js/app.jsx',
+            },
+        },
+    },
 });
+
