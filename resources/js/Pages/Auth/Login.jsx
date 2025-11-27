@@ -21,7 +21,7 @@ export default function Login({ status, canResetPassword }) {
             <div className="w-full max-w-md mx-auto px-4">
                 <div className="text-center mb-8">
                     <ApplicationLogo className="h-20 w-auto mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-[#1E88E5]">EDUAI</h2>
+                    <h2 className="text-2xl font-bold text-[#1E88E5]">EDUAI - UTVT</h2>
                     <p className="text-gray-600 mt-2">Inicia sesión para continuar testing prueba de pruebitas 3</p>
                 </div>
 
